@@ -14,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      # 提交 pnpm-lock.yaml 后，可加上 cache: pnpm 并去掉 --no-frozen-lockfile
+          # 还没有 pnpm-lock.yaml，先关闭缓存；提交锁文件后可删掉这一行并去掉 --no-frozen-lockfile
+          package-manager-cache: false
       - run: pnpm install --no-frozen-lockfile --filter "./packages/**" --filter web
       - name: 计算核心与文案测试
         run: |
