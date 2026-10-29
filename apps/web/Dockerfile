@@ -1,7 +1,9 @@
 # 在仓库根目录构建：docker build -f apps/web/Dockerfile -t lucky-web .
 # GitHub Actions 会同时构建 linux/amd64 和 linux/arm64，适配不同 CPU 的威联通 NAS。
+# 编译阶段固定在构建机的原生架构（$BUILDPLATFORM）上运行，只编译一次；
+# 产物是纯 JavaScript（不含原生模块），直接复制进各架构的运行镜像，避免用 QEMU 模拟编译。
 
-FROM node:22-alpine AS base
+FROM --platform=$BUILDPLATFORM node:22-alpine AS base
 RUN corepack enable
 WORKDIR /repo
 

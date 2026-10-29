@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   // 共享包以 TypeScript 源码形式发布，由 Next.js 负责编译
   transpilePackages: ['@lucky/core', '@lucky/content'],
   poweredByHeader: false,
+  // 不使用依赖原生模块（sharp）的图片优化，保证产物可以跨 CPU 架构运行
+  images: { unoptimized: true },
   async headers() {
     if (!isStaging) return [];
     // 测试版全站禁止搜索引擎收录，避免和正式站抢 SEO
