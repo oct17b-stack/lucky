@@ -14,7 +14,7 @@ packages/
   core/       计算核心：八字、节气、真太阳时、泰式生日星期、手机号分析（纯 TS，无依赖）
   content/    四语界面文案、语言协商
   api/        三端共享的接口类型
-  db/         Prisma schema（PostgreSQL）
+  db/         业务数据表（Drizzle ORM + PostgreSQL）；账号表由 Better Auth 管理
 deploy/
   qnap/       威联通 NAS 测试版：docker compose、Cloudflare Tunnel、备份
 .github/
@@ -34,6 +34,8 @@ pnpm dev:mobile           # 启动 Expo，用 Expo Go 扫码
 ```
 
 首次安装 App 依赖后，执行一次 `cd apps/mobile && npx expo install --fix`，把 Expo 相关包对齐到当前 SDK 的版本。安装完成后请提交生成的 `pnpm-lock.yaml`。
+
+本地登录调试：复制 `apps/web/.env.example` 为 `apps/web/.env.local` 并填写，Google 和 LINE 的后台配置见 [docs/login-setup.md](docs/login-setup.md)。
 
 App 连接测试版接口：在 `apps/mobile/.env` 写入 `EXPO_PUBLIC_API_URL=https://beta.你的域名`。
 

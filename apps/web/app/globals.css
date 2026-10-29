@@ -490,3 +490,114 @@ a {
 .reading p {
   margin: 0 0 10px;
 }
+
+.narrow {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  margin-top: 24px;
+}
+
+.login-buttons {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* LINE 品牌绿 #06C755 */
+.login-line {
+  background: #06c755;
+  color: #fff;
+}
+
+.login-google {
+  background: #fff;
+  color: #1f1f1f;
+  border-color: #747775;
+}
+
+.user-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 28px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.login-link {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.avatar.small {
+  width: 28px;
+  height: 28px;
+}
+
+.avatar.placeholder {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  background: var(--accent-soft);
+}
+
+.avatar.small.placeholder {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.profile-card p {
+  margin: 0;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+}

@@ -2,17 +2,25 @@
   "name": "@lucky/db",
   "version": "0.1.0",
   "private": true,
-  "description": "数据库 schema 与迁移（PostgreSQL + Prisma）",
+  "type": "module",
+  "description": "业务数据表（Drizzle ORM + PostgreSQL）。账号表由 Better Auth 管理，见 apps/web/lib/auth.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
   "scripts": {
-    "generate": "prisma generate",
-    "migrate:dev": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "studio": "prisma studio"
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit -p ."
   },
   "dependencies": {
-    "@prisma/client": "^6.16.0"
+    "drizzle-orm": "^0.44.0",
+    "pg": "^8.16.0"
   },
   "devDependencies": {
-    "prisma": "^6.16.0"
+    "@types/pg": "^8.15.0",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^5.9.0"
   }
 }

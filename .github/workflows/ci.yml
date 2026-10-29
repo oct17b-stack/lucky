@@ -25,10 +25,10 @@ jobs:
         run: |
           set -o pipefail
           pnpm --filter "./packages/**" test 2>&1 | tee test.log
-      - name: 网站类型检查
+      - name: 类型检查
         run: |
           set -o pipefail
-          pnpm --filter web exec tsc --noEmit 2>&1 | tee typecheck.log
+          { pnpm --filter web exec tsc --noEmit && pnpm --filter @lucky/db typecheck; } 2>&1 | tee typecheck.log
       - name: 构建网站
         run: |
           set -o pipefail

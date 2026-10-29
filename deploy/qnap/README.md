@@ -16,7 +16,8 @@
    - 复制 token 填到 `.env` 的 `CLOUDFLARE_TUNNEL_TOKEN`
    - Public Hostname 填 `beta.你的域名`，Service 填 `http://web:3000`
 6. **加访问控制**：Zero Trust → Access → Applications 新建一个应用，域名填 `beta.你的域名`，策略只允许你和测试用户的邮箱。
-7. **启动**：在该目录执行 `docker compose up -d`，或在 Container Station 的「应用程序」里导入。
+7. **登录配置**：在 `.env` 填 `BETTER_AUTH_SECRET` 和 Google / LINE 的密钥，后台的回调地址填 `https://beta.你的域名/api/auth/callback/google`（或 `/line`）。详细步骤见 [docs/login-setup.md](../../docs/login-setup.md)。账号表会在网站启动时自动创建。
+8. **启动**：在该目录执行 `docker compose up -d`，或在 Container Station 的「应用程序」里导入。
 
 ## 检查
 

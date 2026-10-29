@@ -13,6 +13,9 @@ services:
     environment:
       APP_ENV: staging
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      # 启动时自动创建或补齐账号表
+      AUTO_MIGRATE: "true"
+      BETTER_AUTH_URL: ${NEXT_PUBLIC_SITE_URL}
     depends_on:
       postgres:
         condition: service_healthy

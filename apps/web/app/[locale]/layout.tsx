@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Noto_Sans_Thai } from 'next/font/google';
 import { LOCALES, LOCALE_META, getMessages } from '@lucky/content';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { UserMenu } from '@/components/UserMenu';
 import { IS_STAGING, SITE_URL, alternatesFor, resolveLocale } from '@/lib/site';
 import '../globals.css';
 
@@ -47,6 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <Link href={`/${locale}/bazi`}>{m.nav.bazi}</Link>
           </nav>
           <LanguageSwitcher current={locale} label={m.nav.language} />
+          <UserMenu locale={locale} loginLabel={m.auth.login} />
         </header>
         <main className="site-main">{children}</main>
         <footer className="site-footer">
