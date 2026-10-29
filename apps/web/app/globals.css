@@ -475,3 +475,18 @@ a {
   color: var(--accent);
   text-decoration: none;
 }
+
+.lunar-fields {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.lunar-fields label.inline {
+  grid-column: 1 / -1;
+}
+
+.reading p {
+  margin: 0 0 10px;
+}

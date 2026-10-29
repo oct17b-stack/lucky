@@ -7,3 +7,4 @@ export * from './thai/phone.ts';
 export * from './cities.ts';
 export * from './lunar.ts';
 export * from './almanac.ts';
+export * from './interpret/bazi.ts';

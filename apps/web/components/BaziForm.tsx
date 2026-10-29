@@ -5,54 +5,127 @@
  * 正式版登录后会把命盘保存到服务端（charts 表）。
  */
 import { useState } from 'react';
-import { CITIES, computeBazi, type BaziResult, type Pillar, type ZiHourRule } from '@lucky/core';
-import { format, type Locale, type Messages } from '@lucky/content';
+import {
+  CITIES,
+  computeBazi,
+  formatLunarChinese,
+  interpretBazi,
+  lunarToSolar,
+  solarToLunar,
+  type BaziReading,
+  type BaziResult,
+  type LunarDate,
+  type Pillar,
+  type ZiHourRule,
+} from '@lucky/core';
+import { format, renderBaziReading, type Locale, type Messages } from '@lucky/content';
 
 const ELEMENT_CLASS: Record<string, string> = { 木: 'el-wood', 火: 'el-fire', 土: 'el-earth', 金: 'el-metal', 水: 'el-water' };
 
+interface Outcome {
+  chart: BaziResult;
+  reading: BaziReading;
+  lunar: LunarDate;
+}
+
 export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] }) {
+  const [calendar, setCalendar] = useState<'solar' | 'lunar'>('solar');
   const [date, setDate] = useState('1990-06-15');
+  const [lunar, setLunar] = useState({ year: 1990, month: 5, day: 23, leap: false });
   const [time, setTime] = useState('08:30');
   const [cityId, setCityId] = useState('bangkok');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [trueSolarTime, setTrueSolarTime] = useState(true);
   const [ziHour, setZiHour] = useState<ZiHourRule>('next-day-at-23');
-  const [result, setResult] = useState<BaziResult | null>(null);
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const [y, mo, d] = date.split('-').map(Number);
+      let y: number | undefined, mo: number | undefined, d: number | undefined;
+      if (calendar === 'lunar') {
+        ({ year: y, month: mo, day: d } = lunarToSolar(lunar.year, lunar.month, lunar.day, lunar.leap));
+      } else {
+        [y, mo, d] = date.split('-').map(Number);
+      }
       const [h, mi] = time.split(':').map(Number);
       const city = CITIES.find((c) => c.id === cityId);
       if (!city || !y || !mo || !d || h === undefined || mi === undefined) throw new Error('invalid');
-      setResult(
-        computeBazi({
-          birth: { year: y, month: mo, day: d, hour: h, minute: mi },
-          timeZone: city.timeZone,
-          longitude: city.lng,
-          gender,
-          options: { trueSolarTime, ziHour },
-        }),
-      );
+      const chart = computeBazi({
+        birth: { year: y, month: mo, day: d, hour: h, minute: mi },
+        timeZone: city.timeZone,
+        longitude: city.lng,
+        gender,
+        options: { trueSolarTime, ziHour },
+      });
+      setOutcome({ chart, reading: interpretBazi(chart), lunar: solarToLunar(y, mo, d) });
       setError(null);
     } catch {
-      setResult(null);
+      setOutcome(null);
       setError(t.error);
     }
   }
 
   const f = t.form;
   const r = t.result;
+  const result = outcome?.chart;
 
   return (
     <>
       <form className="form" onSubmit={submit}>
-        <label>
-          {f.date}
-          <input type="date" value={date} min="1900-01-01" max="2100-12-31" onChange={(e) => setDate(e.target.value)} required />
-        </label>
+        <fieldset>
+          <legend>{f.calendarType}</legend>
+          <label className="inline">
+            <input type="radio" checked={calendar === 'solar'} onChange={() => setCalendar('solar')} /> {f.solar}
+          </label>
+          <label className="inline">
+            <input type="radio" checked={calendar === 'lunar'} onChange={() => setCalendar('lunar')} /> {f.lunar}
+          </label>
+        </fieldset>
+        {calendar === 'solar' ? (
+          <label>
+            {f.date}
+            <input type="date" value={date} min="1901-02-19" max="2099-12-31" onChange={(e) => setDate(e.target.value)} required />
+          </label>
+        ) : (
+          <div className="lunar-fields">
+            <label>
+              {f.lunarYear}
+              <input
+                type="number"
+                min={1901}
+                max={2099}
+                value={lunar.year}
+                onChange={(e) => setLunar({ ...lunar, year: Number(e.target.value) })}
+                required
+              />
+            </label>
+            <label>
+              {f.lunarMonth}
+              <select value={lunar.month} onChange={(e) => setLunar({ ...lunar, month: Number(e.target.value) })}>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {f.lunarDay}
+              <select value={lunar.day} onChange={(e) => setLunar({ ...lunar, day: Number(e.target.value) })}>
+                {Array.from({ length: 30 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="inline">
+              <input type="checkbox" checked={lunar.leap} onChange={(e) => setLunar({ ...lunar, leap: e.target.checked })} /> {f.leapMonth}
+            </label>
+          </div>
+        )}
         <label>
           {f.time}
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
@@ -93,7 +166,7 @@ export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] })
 
       {error && <p className="error">{error}</p>}
 
-      {result && (
+      {outcome && result && (
         <section className="result" aria-live="polite">
           <table className="pillars">
             <thead>
@@ -133,6 +206,10 @@ export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] })
             </dd>
             <dt>{r.zodiac}</dt>
             <dd>{result.zodiac}</dd>
+            <dt>{r.lunarBirth}</dt>
+            <dd>
+              {outcome.lunar.year} · {formatLunarChinese(outcome.lunar, locale === 'zh-hant')}
+            </dd>
             <dt>{r.elements}</dt>
             <dd className="elements">
               {Object.entries(result.elementCount).map(([el, n]) => (
@@ -142,6 +219,14 @@ export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] })
               ))}
             </dd>
           </dl>
+
+          <h2>{t.reading.title}</h2>
+          <div className="reading">
+            {renderBaziReading(outcome.reading.conclusions, locale).map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+            <p className="hint">{format(t.reading.rulesNote, { version: outcome.reading.rulesVersion })}</p>
+          </div>
 
           <h2>{r.luck}</h2>
           <p>
