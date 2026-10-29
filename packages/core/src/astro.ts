@@ -1,19 +1,25 @@
 /**
  * 太阳视黄经与二十四节气时刻。
  *
- * 当前实现：Meeus《天文算法》第 25 章低精度太阳位置（约 ±0.01°，节气时刻约 ±15 分钟）。
- * 这是框架阶段的默认实现，不依赖任何第三方包。
- * 正式上线前用 setSunLongitudeProvider() 换成 astronomy-engine（MIT）或 Swiss Ephemeris，
- * 并让金标准测试集把误差压到 1 分钟以内（见 test/astro.test.ts）。
+ * 默认：astronomy-engine（MIT 授权，基于 VSOP87，含光行差与章动），节气时刻误差在秒级。
+ * 对照：Meeus《天文算法》第 25 章低精度模型（约 ±0.01°，节气误差约 3–8 分钟），
+ *       不依赖第三方包，用于交叉校验。
+ * 也可以用 setSunLongitudeProvider() 换成 Swiss Ephemeris 等其他实现。
  */
-import { julianDayFromMs, msFromJulianDay } from './time.ts';
+import { SunPosition } from 'astronomy-engine';
+import { julianDayFromMs } from './time.ts';
 
 const DEG = Math.PI / 180;
+const MS_PER_DAY = 86_400_000;
 
-/** 输入力学时儒略日（TT），返回太阳视黄经（度，0–360） */
-export type SunLongitudeProvider = (jdTT: number) => number;
+/** 输入 UTC 毫秒，返回该时刻太阳的视黄经（度，0–360，当日真春分点） */
+export type SunLongitudeProvider = (utcMs: number) => number;
 
-export const meeusLowPrecisionSun: SunLongitudeProvider = (jdTT) => {
+export const astronomyEngineSun: SunLongitudeProvider = (utcMs) => normalizeDegrees(SunPosition(new Date(utcMs)).elon);
+
+export const meeusLowPrecisionSun: SunLongitudeProvider = (utcMs) => {
+  const jd = julianDayFromMs(utcMs);
+  const jdTT = jd + deltaTSeconds(decimalYearFromJd(jd)) / 86400;
   const t = (jdTT - 2451545.0) / 36525;
   const l0 = 280.46646 + 36000.76983 * t + 0.0003032 * t * t;
   const m = (357.52911 + 35999.05029 * t - 0.0001537 * t * t) * DEG;
@@ -26,10 +32,10 @@ export const meeusLowPrecisionSun: SunLongitudeProvider = (jdTT) => {
   return normalizeDegrees(apparent);
 };
 
-let provider: SunLongitudeProvider = meeusLowPrecisionSun;
-let providerName = 'meeus-low-precision';
+let provider: SunLongitudeProvider = astronomyEngineSun;
+let providerName = 'astronomy-engine';
 
-/** 替换太阳位置算法（例如接入 astronomy-engine） */
+/** 替换太阳位置算法 */
 export function setSunLongitudeProvider(fn: SunLongitudeProvider, name: string): void {
   provider = fn;
   providerName = name;
@@ -87,22 +93,27 @@ function decimalYearFromJd(jd: number): number {
 }
 
 /** 某一 UTC 时刻的太阳视黄经（度） */
-export function sunLongitudeAt(utcMs: number): number {
-  const jd = julianDayFromMs(utcMs);
-  return provider(jd + deltaTSeconds(decimalYearFromJd(jd)) / 86400);
+export function sunLongitudeAt(utcMs: number, using: SunLongitudeProvider = provider): number {
+  return using(utcMs);
 }
 
-/** 从 guessUtcMs 附近求太阳视黄经等于 targetDeg 的 UTC 时刻 */
-export function findSunLongitudeUtc(targetDeg: number, guessUtcMs: number): number {
-  let jd = julianDayFromMs(guessUtcMs);
-  for (let i = 0; i < 50; i++) {
-    const lon = provider(jd + deltaTSeconds(decimalYearFromJd(jd)) / 86400);
-    let diff = normalizeDegrees(targetDeg - lon);
+/**
+ * 从 guessUtcMs 附近求太阳视黄经等于 targetDeg 的 UTC 时刻。
+ * 牛顿迭代，收敛到约 0.1 秒；猜测值偏差在 ±10 天内都能收敛到正确的那一次。
+ */
+export function findSunLongitudeUtc(
+  targetDeg: number,
+  guessUtcMs: number,
+  using: SunLongitudeProvider = provider,
+): number {
+  let t = guessUtcMs;
+  for (let i = 0; i < 30; i++) {
+    let diff = normalizeDegrees(targetDeg - using(t));
     if (diff > 180) diff -= 360;
-    jd += diff / 0.98564736;
-    if (Math.abs(diff) < 1e-7) break;
+    t += (diff / 0.98564736) * MS_PER_DAY;
+    if (Math.abs(diff) < 1e-6) break;
   }
-  return msFromJulianDay(jd);
+  return t;
 }
 
 /** 二十四节气，按太阳视黄经从小寒开始排（与公历年内顺序一致） */
@@ -135,18 +146,27 @@ export const SOLAR_TERMS = [
 
 export type SolarTermName = (typeof SOLAR_TERMS)[number]['name'];
 
-/** 某公历年内某个节气的 UTC 时刻 */
-export function solarTermUtc(year: number, termName: SolarTermName): number {
+const termCache = new Map<string, number>();
+
+/** 某公历年内某个节气的 UTC 时刻（默认模型的结果会缓存） */
+export function solarTermUtc(year: number, termName: SolarTermName, using?: SunLongitudeProvider): number {
   const term = SOLAR_TERMS.find((t) => t.name === termName);
   if (!term) throw new Error(`未知节气：${termName}`);
+  const key = `${providerName}|${year}|${termName}`;
+  if (!using) {
+    const cached = termCache.get(key);
+    if (cached !== undefined) return cached;
+  }
   // 黄经 285–360 的节气（小寒到惊蛰）落在公历年初，从上一年春分起推
   const baseYear = term.longitude >= 285 ? year - 1 : year;
   const equinoxGuess = Date.UTC(baseYear, 2, 20);
-  const guess = equinoxGuess + (normalizeDegrees(term.longitude) / 360) * 365.2422 * 86_400_000;
-  return findSunLongitudeUtc(term.longitude, guess);
+  const guess = equinoxGuess + (normalizeDegrees(term.longitude) / 360) * 365.2422 * MS_PER_DAY;
+  const result = findSunLongitudeUtc(term.longitude, guess, using ?? provider);
+  if (!using) termCache.set(key, result);
+  return result;
 }
 
 /** 返回某年全部 24 个节气（按时间顺序） */
-export function solarTermsOfYear(year: number): { name: SolarTermName; utcMs: number }[] {
-  return SOLAR_TERMS.map((t) => ({ name: t.name, utcMs: solarTermUtc(year, t.name) }));
+export function solarTermsOfYear(year: number, using?: SunLongitudeProvider): { name: SolarTermName; utcMs: number }[] {
+  return SOLAR_TERMS.map((t) => ({ name: t.name, utcMs: solarTermUtc(year, t.name, using) }));
 }
