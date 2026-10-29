@@ -1,0 +1,8 @@
+**/node_modules
+**/.next
+**/.turbo
+**/.expo
+.git
+deploy/qnap/data
+*.log
+.env
