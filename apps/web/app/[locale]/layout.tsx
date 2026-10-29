@@ -41,6 +41,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             {m.site.name}
           </Link>
           <nav className="site-nav">
+            <Link href={`/${locale}/calendar`}>{m.nav.calendar}</Link>
             <Link href={`/${locale}/lucky-color`}>{m.nav.luckyColor}</Link>
             <Link href={`/${locale}/phone-number`}>{m.nav.phone}</Link>
             <Link href={`/${locale}/bazi`}>{m.nav.bazi}</Link>

@@ -7,6 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 同一分支有新提交时，取消还在进行的旧构建
+concurrency:
+  group: staging-image-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: write

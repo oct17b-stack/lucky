@@ -5,3 +5,5 @@ export * from './bazi.ts';
 export * from './thai/birthday.ts';
 export * from './thai/phone.ts';
 export * from './cities.ts';
+export * from './lunar.ts';
+export * from './almanac.ts';

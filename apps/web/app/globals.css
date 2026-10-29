@@ -425,3 +425,53 @@ a {
     align-items: flex-start;
   }
 }
+
+.almanac {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--day-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.almanac-head {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+.almanac-date {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.almanac-lunar {
+  color: var(--accent);
+  font-size: 18px;
+  margin: 4px 0 0;
+}
+
+.almanac .swatch {
+  display: inline-block;
+  background: var(--day-color);
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.hint.block {
+  display: block;
+  font-weight: 400;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.pager a {
+  color: var(--accent);
+  text-decoration: none;
+}

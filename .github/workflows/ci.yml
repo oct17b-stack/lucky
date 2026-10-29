@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,6 +33,10 @@ jobs:
         run: |
           set -o pipefail
           pnpm --filter web build 2>&1 | tee build.log
+      - name: 汇总关键指标
+        if: always()
+        run: |
+          [ -f test.log ] && grep -hoE "(节气误差|与 Meeus 模型的最大差异)[^\r]*" test.log | while read -r line; do echo "::notice title=core::${line}"; done || true
       # 失败时把日志末尾作为注释（annotation）回传，方便在 API 和 PR 页面直接看到原因
       - name: 回传失败日志
         if: failure()
