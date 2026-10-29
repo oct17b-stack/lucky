@@ -1,0 +1,16 @@
+{
+  "name": "@lucky/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "网站、App 与后端共享的接口类型",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

@@ -3,7 +3,7 @@ import type { Locale, Messages } from '@lucky/content';
 
 export function BirthDayCard({ info, locale, t }: { info: ThaiBirthDayInfo; locale: Locale; t: Messages['birthday'] }) {
   return (
-    <div className="birthday-card" style={{ ['--day-color' as string]: info.color.hex }}>
+    <div className="birthday-card" style={{ '--day-color': info.color.hex } as React.CSSProperties}>
       <div className="swatch large" aria-hidden />
       <dl className="facts">
         <dt>{t.yourDay}</dt>

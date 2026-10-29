@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # 提交 pnpm-lock.yaml 后，可加上 cache: pnpm 并去掉 --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile --filter "./packages/**" --filter web
+      - name: 计算核心与文案测试
+        run: pnpm --filter "./packages/**" test
+      - name: 构建网站
+        run: pnpm --filter web build

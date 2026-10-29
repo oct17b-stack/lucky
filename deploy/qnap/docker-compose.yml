@@ -1,0 +1,78 @@
+# 威联通 NAS 测试版（staging）
+# 用法：在 Container Station →「应用程序」→「创建」，粘贴本文件；
+#      或 SSH 登录 NAS 后在本目录执行 docker compose up -d
+# 详细步骤见同目录 README.md
+
+name: lucky-staging
+
+services:
+  web:
+    image: ghcr.io/oct17b-stack/lucky-web:staging
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_ENV: staging
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # 只在局域网调试时打开；对外访问统一走 Cloudflare Tunnel，不要在路由器上转发这个端口
+    ports:
+      - "3000:3000"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # 每晚导出数据库，保留 14 天；配合 NAS 存储池快照使用
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        while true; do
+          pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} | gzip > /backups/lucky-$$(date +%F).sql.gz;
+          find /backups -name 'lucky-*.sql.gz' -mtime +14 -delete;
+          sleep 86400;
+        done
+
+  # Cloudflare Tunnel：把 beta.你的域名 安全地指向 NAS，不需要开放任何端口
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
+
+  # 每 10 分钟检查一次新镜像，有更新就自动重启 web
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    command: --interval 600 --label-enable --cleanup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 私有镜像需要先在 NAS 上执行 docker login ghcr.io，再把凭据挂进来
+      - ${DOCKER_CONFIG_JSON:-/root/.docker/config.json}:/config.json:ro
