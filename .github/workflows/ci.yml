@@ -12,6 +12,18 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -33,6 +45,20 @@ jobs:
         run: |
           set -o pipefail
           pnpm --filter web build 2>&1 | tee build.log
+      # 冒烟测试：真实数据库 + 生产模式启动，检查自动建表、页面和登录跳转
+      - name: 冒烟测试
+        env:
+          DATABASE_URL: postgresql://postgres:ci@localhost:5432/postgres
+          AUTO_MIGRATE: "true"
+          BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+          BETTER_AUTH_URL: http://localhost:3000
+          GOOGLE_CLIENT_ID: ci-google-id
+          GOOGLE_CLIENT_SECRET: ci-google-secret
+          LINE_CLIENT_ID: "1234567890"
+          LINE_CLIENT_SECRET: ci-line-secret
+        run: |
+          set -o pipefail
+          bash scripts/smoke.sh 2>&1 | tee smoke.log
       - name: 汇总关键指标
         if: always()
         run: |
@@ -41,7 +67,7 @@ jobs:
       - name: 回传失败日志
         if: failure()
         run: |
-          for f in test.log typecheck.log build.log; do
+          for f in test.log typecheck.log build.log smoke.log; do
             [ -f "$f" ] || continue
             body=$(tail -n 60 "$f" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
             echo "::error title=${f}::${body}"
