@@ -17,6 +17,23 @@ jobs:
       # 提交 pnpm-lock.yaml 后，可加上 cache: pnpm 并去掉 --no-frozen-lockfile
       - run: pnpm install --no-frozen-lockfile --filter "./packages/**" --filter web
       - name: 计算核心与文案测试
-        run: pnpm --filter "./packages/**" test
+        run: |
+          set -o pipefail
+          pnpm --filter "./packages/**" test 2>&1 | tee test.log
+      - name: 网站类型检查
+        run: |
+          set -o pipefail
+          pnpm --filter web exec tsc --noEmit 2>&1 | tee typecheck.log
       - name: 构建网站
-        run: pnpm --filter web build
+        run: |
+          set -o pipefail
+          pnpm --filter web build 2>&1 | tee build.log
+      # 失败时把日志末尾作为注释（annotation）回传，方便在 API 和 PR 页面直接看到原因
+      - name: 回传失败日志
+        if: failure()
+        run: |
+          for f in test.log typecheck.log build.log; do
+            [ -f "$f" ] || continue
+            body=$(tail -n 60 "$f" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=${f}::${body}"
+          done
