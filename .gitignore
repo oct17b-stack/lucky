@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+.turbo/
+.expo/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+deploy/qnap/data/
