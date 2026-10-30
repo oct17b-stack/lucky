@@ -86,7 +86,6 @@ export const zhHans = {
     submit: '分析',
     sum: '数字总和',
     pairs: '数字对',
-    rulesPending: '数字含义规则表正在由命理顾问整理，测试版只显示计算结果。',
     invalid: '请输入 06、08 或 09 开头的 10 位泰国手机号。',
   },
   calendar: {

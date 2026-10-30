@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 import { analyzeThaiMobile, type PhoneAnalysis } from '@lucky/core';
-import { t } from '../../lib/i18n';
+import { THAI_PHONE_RULES } from '@lucky/content';
+import { deviceLocale, t } from '../../lib/i18n';
 
 export default function ToolsScreen() {
   const [value, setValue] = useState('');
@@ -10,7 +11,7 @@ export default function ToolsScreen() {
 
   function analyze() {
     try {
-      setResult(analyzeThaiMobile(value));
+      setResult(analyzeThaiMobile(value, THAI_PHONE_RULES));
       setError(false);
     } catch {
       setResult(null);
@@ -19,7 +20,7 @@ export default function ToolsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>{t.phone.title}</Text>
       <TextInput style={styles.input} keyboardType="phone-pad" placeholder={t.phone.placeholder} value={value} onChangeText={setValue} />
       <Pressable style={styles.button} onPress={analyze}>
@@ -28,14 +29,19 @@ export default function ToolsScreen() {
       {error && <Text style={styles.error}>{t.phone.invalid}</Text>}
       {result && (
         <>
-          <Text style={styles.sum}>
-            {t.phone.sum}: {result.sum}
+          <Text style={styles.sum}>{t.numbers.verdicts[result.verdict]}</Text>
+          {result.pairs.map((p) => (
+            <Text key={p.position}>
+              {p.pair} · {p.rule ? t.numbers.tones[p.rule.tone] : '—'} · {p.rule?.meaning[deviceLocale]}
+            </Text>
+          ))}
+          <Text style={styles.label}>
+            {t.phone.sum}: {result.sum} · {result.sumRule?.meaning[deviceLocale]}
           </Text>
-          <Text>{result.pairs.map((p) => p.pair).join('  ')}</Text>
-          <Text style={styles.hint}>{t.phone.rulesPending}</Text>
+          <Text style={styles.hint}>{t.numbers.method}</Text>
         </>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -48,4 +54,5 @@ const styles = StyleSheet.create({
   error: { color: '#c62828' },
   sum: { fontSize: 28, fontWeight: '700', color: '#7a1f2b' },
   hint: { color: '#6f625a', fontSize: 12 },
+  label: { color: '#6f625a' },
 });

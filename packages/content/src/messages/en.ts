@@ -87,7 +87,6 @@ export const en: Messages = {
     submit: 'Analyze',
     sum: 'Digit sum',
     pairs: 'Digit pairs',
-    rulesPending: 'Pair meanings are being reviewed by our consultant; the beta shows the calculation only.',
     invalid: 'Enter a 10-digit Thai mobile number starting with 06, 08 or 09.',
   },
   calendar: {

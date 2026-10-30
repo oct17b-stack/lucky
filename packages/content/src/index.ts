@@ -34,3 +34,14 @@ export function format(template: string, values: Record<string, string | number>
 export { renderBaziReading, type ConclusionLike } from './rules/bazi.ts';
 export { SIAMSI, SIAMSI_TOPICS, type SiamsiStick, type SiamsiTopic } from './rules/siamsi.ts';
 export { TAROT_MAJOR, type TarotCard } from './rules/tarot.ts';
+export {
+  NAME_MEANINGS,
+  PAIR_MEANINGS,
+  SUM_MEANINGS,
+  THAI_PHONE_RULES,
+  readableTotal,
+  totalMeaning,
+  type NumberMeaning,
+  type NumberTone,
+  type NumberTopic,
+} from './rules/numbers.ts';

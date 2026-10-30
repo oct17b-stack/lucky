@@ -87,7 +87,6 @@ export const zhHant: Messages = {
     submit: '分析',
     sum: '數字總和',
     pairs: '數字對',
-    rulesPending: '數字含義規則表正在由命理顧問整理，測試版只顯示計算結果。',
     invalid: '請輸入 06、08 或 09 開頭的 10 位泰國手機號。',
   },
   calendar: {

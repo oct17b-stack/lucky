@@ -18,7 +18,7 @@ export default async function PhonePage({ params }: Props) {
     <article className="tool">
       <h1>{m.phone.title}</h1>
       <p className="lead">{m.phone.description}</p>
-      <PhoneForm t={m.phone} />
+      <PhoneForm locale={locale} m={m} />
     </article>
   );
 }

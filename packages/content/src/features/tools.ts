@@ -8,6 +8,24 @@ type Pair = 'sixHarmony' | 'threeHarmony' | 'same' | 'clash' | 'harm' | 'neutral
 type Level = 'great' | 'good' | 'fair' | 'caution';
 
 const zhHans = {
+  numbers: {
+    verdictTitle: '综合评价',
+    verdicts: { great: '非常好的号码', good: '好号码', fair: '一般，有优有缺', poor: '建议考虑换号' },
+    tones: { good: '吉', bad: '凶', mixed: '吉凶参半' },
+    topics: { money: '财运', work: '事业', love: '感情人缘', health: '健康', luck: '好运', speech: '口才', wisdom: '智慧', patron: '贵人', stress: '压力是非' },
+    strengths: '号码的优势',
+    lastPair: '最后一对（影响最大）',
+    sumMeaning: '总和的含义',
+    pairsTitle: '数字对（后 7 位）',
+    warnings: {
+      'last-pair-bad': '最后一对是凶数，影响最大，建议优先考虑。',
+      'last-pair-69': '69/96 在通行说法中不宜放在最后，有“钱来得快去得也快”之说。',
+    },
+    method: '读法：按泰国多数来源，只看后 7 位，相邻两位一组，最后一对影响最大；正反读同义。吉凶取多数来源的说法。综合评价为本站计分：好对 +1、凶对 −1，最后一对计两倍，总和吉凶 ±1。',
+    totalTitle: '总和的含义',
+    readAs: '超过 100 时读作 {n}',
+    sources: '依据：比对 Thairath、Sanook、Central 等 31 个泰国来源的通行说法。',
+  },
   nav2: {
     dailyColor: '今日幸运色',
     horoscope: '每日运势',
@@ -54,7 +72,6 @@ const zhHans = {
     kalakiniNone: '名字里没有กาลกิณี字母。',
     letterHouses: '字母落宫',
     numerology: '数字总和（เลขศาสตร์）',
-    numerologyPending: '数值表采用泰国通行版本（theluckyname、do-doung 等）。总和的吉凶含义各派说法不同，正在由命理顾问整理，暂只显示计算结果。',
     vowelNote: '星期一出生的กาลกิณี是元音组。元音是否全部计入，各派说法不同，这里列出名字中的元音供参考。',
     notThai: '请输入泰文名字。',
   },
@@ -117,6 +134,24 @@ const zhHans = {
 export type ToolsTexts = typeof zhHans;
 
 const zhHant: ToolsTexts = {
+  numbers: {
+    verdictTitle: '綜合評價',
+    verdicts: { great: '非常好的號碼', good: '好號碼', fair: '一般，有優有缺', poor: '建議考慮換號' },
+    tones: { good: '吉', bad: '凶', mixed: '吉凶參半' },
+    topics: { money: '財運', work: '事業', love: '感情人緣', health: '健康', luck: '好運', speech: '口才', wisdom: '智慧', patron: '貴人', stress: '壓力是非' },
+    strengths: '號碼的優勢',
+    lastPair: '最後一對（影響最大）',
+    sumMeaning: '總和的含義',
+    pairsTitle: '數字對（後 7 位）',
+    warnings: {
+      'last-pair-bad': '最後一對是凶數，影響最大，建議優先考慮。',
+      'last-pair-69': '69/96 在通行說法中不宜放在最後，有「錢來得快去得也快」之說。',
+    },
+    method: '讀法：按泰國多數來源，只看後 7 位，相鄰兩位一組，最後一對影響最大；正反讀同義。吉凶取多數來源的說法。綜合評價為本站計分：好對 +1、凶對 −1，最後一對計兩倍，總和吉凶 ±1。',
+    totalTitle: '總和的含義',
+    readAs: '超過 100 時讀作 {n}',
+    sources: '依據：比對 Thairath、Sanook、Central 等 31 個泰國來源的通行說法。',
+  },
   nav2: {
     dailyColor: '今日幸運色',
     horoscope: '每日運勢',
@@ -163,7 +198,6 @@ const zhHant: ToolsTexts = {
     kalakiniNone: '名字裡沒有กาลกิณี字母。',
     letterHouses: '字母落宮',
     numerology: '數字總和（เลขศาสตร์）',
-    numerologyPending: '數值表採用泰國通行版本（theluckyname、do-doung 等）。總和的吉凶含義各派說法不同，正在由命理顧問整理，暫只顯示計算結果。',
     vowelNote: '星期一出生的กาลกิณี是母音組。母音是否全部計入，各派說法不同，這裡列出名字中的母音供參考。',
     notThai: '請輸入泰文名字。',
   },
@@ -224,6 +258,24 @@ const zhHant: ToolsTexts = {
 };
 
 const th: ToolsTexts = {
+  numbers: {
+    verdictTitle: 'ผลการวิเคราะห์โดยรวม',
+    verdicts: { great: 'เบอร์ดีมาก', good: 'เบอร์ดี', fair: 'ปานกลาง มีทั้งข้อดีและข้อเสีย', poor: 'ควรพิจารณาเปลี่ยนเบอร์' },
+    tones: { good: 'ดี', bad: 'ร้าย', mixed: 'ดีปนร้าย' },
+    topics: { money: 'การเงิน', work: 'การงาน', love: 'ความรัก เสน่ห์', health: 'สุขภาพ', luck: 'โชคลาภ', speech: 'การเจรจา', wisdom: 'สติปัญญา', patron: 'ผู้ใหญ่อุปถัมภ์', stress: 'ความเครียด ปัญหา' },
+    strengths: 'จุดเด่นของเบอร์',
+    lastPair: 'คู่ท้าย (มีผลมากที่สุด)',
+    sumMeaning: 'ความหมายของผลรวม',
+    pairsTitle: 'คู่เลข (7 ตัวท้าย)',
+    warnings: {
+      'last-pair-bad': 'คู่ท้ายเป็นเลขร้าย ซึ่งมีผลมากที่สุด ควรพิจารณาเป็นอันดับแรก',
+      'last-pair-69': 'ตามตำราทั่วไป ไม่ควรมี 69/96 เป็นคู่ท้าย เพราะเงินมาเร็วแต่ก็ไปเร็ว',
+    },
+    method: 'วิธีอ่าน: ตามตำราส่วนใหญ่ ดูเฉพาะ 7 ตัวท้าย อ่านทีละคู่ที่อยู่ติดกัน คู่ท้ายมีผลมากที่สุด และคู่กลับหน้าหลังมีความหมายเดียวกัน ความหมายดีร้ายยึดตามตำราส่วนใหญ่ ส่วนผลโดยรวมเป็นเกณฑ์ของเว็บไซต์: คู่ดี +1 คู่ร้าย −1 คู่ท้ายคิดสองเท่า และผลรวมดีหรือร้าย ±1',
+    totalTitle: 'ความหมายของผลรวม',
+    readAs: 'ผลรวมเกิน 100 อ่านเป็น {n}',
+    sources: 'อ้างอิง: เทียบความหมายที่นิยมทั่วไปจากแหล่งข้อมูลไทย 31 แห่ง เช่น ไทยรัฐ สนุก และเซ็นทรัล',
+  },
   nav2: {
     dailyColor: 'สีเสื้อมงคล',
     horoscope: 'ดวงรายวัน',
@@ -270,7 +322,6 @@ const th: ToolsTexts = {
     kalakiniNone: 'ชื่อไม่มีอักษรกาลกิณี',
     letterHouses: 'อักษรในแต่ละภูมิ',
     numerology: 'ผลรวมเลขศาสตร์',
-    numerologyPending: 'ใช้ตารางค่าตัวเลขฉบับที่นิยมทั่วไป ส่วนความหมายของผลรวมแต่ละตำราต่างกัน อยู่ระหว่างการเรียบเรียงโดยผู้เชี่ยวชาญ ขณะนี้แสดงเฉพาะผลการคำนวณ',
     vowelNote: 'อักษรกาลกิณีของคนเกิดวันจันทร์คือสระ ซึ่งแต่ละตำราตีความต่างกันว่าต้องนับสระทุกตัวหรือไม่ ระบบแสดงสระที่พบในชื่อไว้เพื่อประกอบการพิจารณา',
     notThai: 'กรุณากรอกชื่อเป็นภาษาไทย',
   },
@@ -331,6 +382,24 @@ const th: ToolsTexts = {
 };
 
 const en: ToolsTexts = {
+  numbers: {
+    verdictTitle: 'Overall',
+    verdicts: { great: 'An excellent number', good: 'A good number', fair: 'Average, with strengths and weaknesses', poor: 'Consider changing this number' },
+    tones: { good: 'Good', bad: 'Bad', mixed: 'Mixed' },
+    topics: { money: 'Money', work: 'Career', love: 'Love and charm', health: 'Health', luck: 'Luck', speech: 'Speech', wisdom: 'Wisdom', patron: 'Patrons', stress: 'Stress and trouble' },
+    strengths: 'Strengths of this number',
+    lastPair: 'Last pair (most important)',
+    sumMeaning: 'Meaning of the total',
+    pairsTitle: 'Digit pairs (last 7 digits)',
+    warnings: {
+      'last-pair-bad': 'The last pair, which matters most, is unfavorable. Look at this first.',
+      'last-pair-69': 'By common belief 69/96 should not be the last pair: money comes fast and goes fast.',
+    },
+    method: 'How it is read: following most Thai sources, only the last 7 digits count, read as adjacent pairs; the last pair matters most, and reversed pairs mean the same. Good and bad follow the majority of sources. The overall rating is this site’s scoring: good pair +1, bad pair −1, last pair counted twice, total ±1.',
+    totalTitle: 'Meaning of the total',
+    readAs: 'Totals over 100 are read as {n}',
+    sources: 'Based on the common meanings compared across 31 Thai sources, including Thairath, Sanook and Central.',
+  },
   nav2: {
     dailyColor: 'Lucky colors',
     horoscope: 'Daily horoscope',
@@ -377,7 +446,6 @@ const en: ToolsTexts = {
     kalakiniNone: 'The name has no Kalakini letters.',
     letterHouses: 'Letters by house',
     numerology: 'Numerology total',
-    numerologyPending: 'Letter values follow the common Thai table. Meanings of the totals differ between schools and are being prepared by our consultant, so only the calculation is shown for now.',
     vowelNote: 'For Monday-born people the Kalakini group is the vowels. Schools differ on whether every vowel counts, so the vowels in the name are listed for reference.',
     notThai: 'Please enter the name in Thai script.',
   },

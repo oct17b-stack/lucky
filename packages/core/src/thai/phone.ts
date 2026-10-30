@@ -1,12 +1,16 @@
 /**
- * 泰式手机号分析（เบอร์มงคล）：号码标准化、数字总和、相邻两位数字对（คู่เลข）。
+ * 泰式手机号分析（เบอร์มงคล）。
  *
- * 数字对和总和的吉凶含义由规则表决定（PhoneRuleSet），规则表作为数据单独维护，
- * 由泰国命理顾问提供和审校。框架里不内置任何真实含义，只有测试用的示例规则。
+ * 读法采用泰国多数来源的通行做法（Sanook/อ.ปอ、aduang、Shopee、nanitalk、sim789 等）：
+ * - 只看后 7 位（去掉开头的 0 和运营商号段两位），相邻两位一组，共 6 对
+ * - 数字对正反读含义相同（24 与 42 同义）
+ * - 最后一对影响最大；69/96 不宜放在最后（อ.ปอ）
+ * - 总和为全部 10 位数字之和
+ * 含义规则表（PhoneRuleSet）作为数据单独维护，见 @lucky/content 的 rules/numbers.ts。
  */
 
-export type Tone = 'good' | 'bad' | 'neutral';
-export type Topic = 'money' | 'career' | 'love' | 'health' | 'luck' | 'social';
+export type Tone = 'good' | 'bad' | 'mixed';
+export type Topic = 'money' | 'work' | 'love' | 'health' | 'luck' | 'speech' | 'wisdom' | 'patron' | 'stress';
 
 export interface PairRule {
   tone: Tone;
@@ -16,7 +20,7 @@ export interface PairRule {
 
 export interface PhoneRuleSet {
   id: string;
-  /** 数字对规则，键为两位数字，例如 "24"；不区分顺序的规则可同时登记 "24" 和 "42" */
+  /** 数字对规则，键为两位数字；正反两种顺序都要登记 */
   pairs: Record<string, PairRule>;
   /** 总和规则，键为总和数字 */
   sums: Record<string, PairRule>;
@@ -24,13 +28,21 @@ export interface PhoneRuleSet {
 
 export const EMPTY_RULESET: PhoneRuleSet = { id: 'empty', pairs: {}, sums: {} };
 
+export type PhoneVerdict = 'great' | 'good' | 'fair' | 'poor';
+
 export interface PhoneAnalysis {
   /** 标准化后的 10 位号码，例如 0812345678 */
   normalized: string;
   sum: number;
   sumRule: PairRule | null;
-  pairs: { pair: string; position: number; rule: PairRule | null }[];
-  score: { good: number; bad: number; neutral: number; unknown: number };
+  /** 后 7 位的 6 个数字对；last = 最后一对 */
+  pairs: { pair: string; position: number; last: boolean; rule: PairRule | null }[];
+  score: { good: number; bad: number; mixed: number; unknown: number };
+  /** 综合评价（本站规则，见 phoneVerdict） */
+  verdict: PhoneVerdict;
+  /** 主要优势（好数字对涉及最多的主题，最多 3 个） */
+  strengths: Topic[];
+  warnings: ('last-pair-bad' | 'last-pair-69')[];
   ruleSetId: string;
 }
 
@@ -43,22 +55,65 @@ export function normalizeThaiMobile(input: string): string | null {
 }
 
 /**
- * 分析手机号。数字对从第 2 位开始取（跳过开头的 0），共 8 对。
+ * 综合评价（本站的计分约定，结果页会说明）：
+ * 每个好数字对 +1、坏数字对 −1，最后一对计两倍；总和为好 +1、为坏 −1。
+ * 得分 ≥ 4 且最后一对不坏 → great；≥ 2 → good；≥ 0 → fair；其余 → poor。
+ * 最后一对为坏时，最高只评 fair。
  */
+export function phoneVerdict(points: number, lastPairBad: boolean): PhoneVerdict {
+  let v: PhoneVerdict = points >= 4 ? 'great' : points >= 2 ? 'good' : points >= 0 ? 'fair' : 'poor';
+  if (lastPairBad && (v === 'great' || v === 'good')) v = 'fair';
+  return v;
+}
+
+const toneValue = (t: Tone | undefined) => (t === 'good' ? 1 : t === 'bad' ? -1 : 0);
+
 export function analyzeThaiMobile(input: string, rules: PhoneRuleSet = EMPTY_RULESET): PhoneAnalysis {
   const normalized = normalizeThaiMobile(input);
   if (!normalized) throw new RangeError('不是有效的泰国手机号（应为 06/08/09 开头的 10 位号码）');
   const digits = [...normalized].map(Number);
   const sum = digits.reduce((a, b) => a + b, 0);
-  const pairs = [];
-  for (let i = 1; i < digits.length - 1; i++) {
+
+  const pairs: PhoneAnalysis['pairs'] = [];
+  for (let i = 3; i < 9; i++) {
     const pair = normalized.slice(i, i + 2);
-    pairs.push({ pair, position: i, rule: rules.pairs[pair] ?? null });
+    pairs.push({ pair, position: i, last: i === 8, rule: rules.pairs[pair] ?? null });
   }
-  const score = { good: 0, bad: 0, neutral: 0, unknown: 0 };
+
+  const score = { good: 0, bad: 0, mixed: 0, unknown: 0 };
+  let points = 0;
   for (const p of pairs) {
     if (p.rule) score[p.rule.tone] += 1;
     else score.unknown += 1;
+    points += toneValue(p.rule?.tone) * (p.last ? 2 : 1);
   }
-  return { normalized, sum, sumRule: rules.sums[String(sum)] ?? null, pairs, score, ruleSetId: rules.id };
+  const sumRule = rules.sums[String(sum)] ?? null;
+  points += toneValue(sumRule?.tone);
+
+  const last = pairs[pairs.length - 1]!;
+  const warnings: PhoneAnalysis['warnings'] = [];
+  if (last.rule?.tone === 'bad') warnings.push('last-pair-bad');
+  if (last.pair === '69' || last.pair === '96') warnings.push('last-pair-69');
+
+  const topicCount = new Map<Topic, number>();
+  for (const p of pairs) {
+    if (p.rule?.tone !== 'good') continue;
+    for (const t of p.rule.topics) topicCount.set(t, (topicCount.get(t) ?? 0) + 1);
+  }
+  const strengths = [...topicCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([t]) => t);
+
+  return {
+    normalized,
+    sum,
+    sumRule,
+    pairs,
+    score,
+    verdict: phoneVerdict(points, last.rule?.tone === 'bad'),
+    strengths,
+    warnings,
+    ruleSetId: rules.id,
+  };
 }

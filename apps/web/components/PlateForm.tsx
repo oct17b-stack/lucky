@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { analyzeThaiPlate, type PlateAnalysis } from '@lucky/core';
-import type { Messages } from '@lucky/content';
+import type { Locale, Messages } from '@lucky/content';
+import { TotalMeaning } from './TotalMeaning';
 import { ShareButtons } from './ShareButtons';
 
-export function PlateForm({ m }: { m: Messages }) {
+export function PlateForm({ locale, m }: { locale: Locale; m: Messages }) {
   const t = m.plate;
   const [value, setValue] = useState('');
   const [result, setResult] = useState<PlateAnalysis | null>(null);
@@ -40,7 +41,7 @@ export function PlateForm({ m }: { m: Messages }) {
           <p className="hint letters">
             {[...result.letters.map((l) => `${l.ch}=${l.value}`), ...result.digits.map(String)].join(' + ')}
           </p>
-          <p className="hint">{m.name.numerologyPending}</p>
+          <TotalMeaning total={result.sum} locale={locale} m={m} />
           <ShareButtons t={m.share} text={`${t.title}: ${result.plate} = ${result.sum}`} />
         </section>
       )}

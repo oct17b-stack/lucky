@@ -2,9 +2,12 @@
 
 import { useState } from 'react';
 import { analyzeThaiMobile, type PhoneAnalysis } from '@lucky/core';
-import type { Messages } from '@lucky/content';
+import { THAI_PHONE_RULES, type Locale, type Messages } from '@lucky/content';
+import { ShareButtons } from './ShareButtons';
 
-export function PhoneForm({ t }: { t: Messages['phone'] }) {
+export function PhoneForm({ locale, m }: { locale: Locale; m: Messages }) {
+  const t = m.phone;
+  const n = m.numbers;
   const [value, setValue] = useState('');
   const [result, setResult] = useState<PhoneAnalysis | null>(null);
   const [error, setError] = useState(false);
@@ -12,14 +15,15 @@ export function PhoneForm({ t }: { t: Messages['phone'] }) {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      // 规则表由顾问提供后，从服务端加载并作为第二个参数传入
-      setResult(analyzeThaiMobile(value));
+      setResult(analyzeThaiMobile(value, THAI_PHONE_RULES));
       setError(false);
     } catch {
       setResult(null);
       setError(true);
     }
   }
+
+  const display = (num: string) => `${num.slice(0, 3)}-${num.slice(3, 6)}-${num.slice(6)}`;
 
   return (
     <>
@@ -32,18 +36,49 @@ export function PhoneForm({ t }: { t: Messages['phone'] }) {
       {error && <p className="error">{t.invalid}</p>}
       {result && (
         <section className="result">
-          <p className="big-number">
-            {t.sum}: <strong>{result.sum}</strong>
+          <p className="plate phone-number">{display(result.normalized)}</p>
+          <p className={`verdict verdict-${result.verdict}`}>
+            <span className="small-label">{n.verdictTitle}</span>
+            {n.verdicts[result.verdict]}
           </p>
-          <h2>{t.pairs}</h2>
-          <ul className="pairs">
+          {result.strengths.length > 0 && (
+            <p>
+              <strong>{n.strengths}: </strong>
+              {result.strengths.map((s) => n.topics[s]).join(' · ')}
+            </p>
+          )}
+          {result.warnings.map((w) => (
+            <p key={w} className="relation relation-clash">
+              {n.warnings[w]}
+            </p>
+          ))}
+
+          <h2>{n.pairsTitle}</h2>
+          <ul className="pair-list">
             {result.pairs.map((p) => (
-              <li key={p.position} className={p.rule ? `tone-${p.rule.tone}` : 'tone-unknown'}>
-                {p.pair}
+              <li key={p.position} className={`tone-${p.rule?.tone ?? 'unknown'}${p.last ? ' last' : ''}`}>
+                <span className="pair-digits">{p.pair}</span>
+                <span className="pair-tone">{p.rule ? n.tones[p.rule.tone] : '—'}</span>
+                <span className="pair-meaning">
+                  {p.rule?.meaning[locale]}
+                  {p.last && <span className="hint block">{n.lastPair}</span>}
+                </span>
               </li>
             ))}
           </ul>
-          <p className="hint">{t.rulesPending}</p>
+
+          <h2>
+            {t.sum}: {result.sum}
+          </h2>
+          {result.sumRule && (
+            <p className={`tone-text tone-${result.sumRule.tone}`}>
+              <strong>{n.tones[result.sumRule.tone]}</strong> · {result.sumRule.meaning[locale]}
+            </p>
+          )}
+
+          <ShareButtons t={m.share} text={`${t.title}: ${n.verdicts[result.verdict]}`} />
+          <p className="hint">{n.method}</p>
+          <p className="hint">{n.sources}</p>
         </section>
       )}
     </>

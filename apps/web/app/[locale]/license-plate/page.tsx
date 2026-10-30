@@ -16,7 +16,7 @@ export default async function LicensePlatePage({ params }: Props) {
     <article className="tool">
       <h1>{m.plate.title}</h1>
       <p className="lead">{m.plate.description}</p>
-      <PlateForm m={m} />
+      <PlateForm locale={locale} m={m} />
     </article>
   );
 }

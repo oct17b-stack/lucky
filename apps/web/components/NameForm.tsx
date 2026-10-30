@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { HOUSE_NAMES, THAI_BIRTH_DAYS, TAKSA_HOUSES, analyzeThaiName, letterValue, type NameAnalysis, type ThaiBirthDayKey } from '@lucky/core';
 import { format, type Locale, type Messages } from '@lucky/content';
+import { TotalMeaning } from './TotalMeaning';
 import { ShareButtons } from './ShareButtons';
 
 export function NameForm({ locale, m }: { locale: Locale; m: Messages }) {
@@ -85,7 +86,7 @@ export function NameForm({ locale, m }: { locale: Locale; m: Messages }) {
           <p className="hint letters">
             {[...result.name, ...(result.surname ?? '')].map((ch, i) => <span key={i}>{`${ch}${letterValue(ch)} `}</span>)}
           </p>
-          <p className="hint">{t.numerologyPending}</p>
+          <TotalMeaning total={result.sums.total} locale={locale} m={m} />
           <ShareButtons t={m.share} text={t.title} />
         </section>
       )}

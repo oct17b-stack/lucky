@@ -28,17 +28,27 @@ test('手机号标准化', () => {
   assert.equal(normalizeThaiMobile('0812345'), null);
 });
 
-test('手机号分析：总和与 8 个数字对', () => {
-  // 示例规则，仅用于测试，不代表真实含义
+test('手机号分析：后 7 位的 6 个数字对，最后一对加倍计分', () => {
+  // 示例规则，仅用于测试
+  const good = { tone: 'good' as const, topics: ['money' as const], meaning: {} };
+  const bad = { tone: 'bad' as const, topics: ['stress' as const], meaning: {} };
   const sample: PhoneRuleSet = {
     id: 'test-sample',
-    pairs: { '23': { tone: 'good', topics: ['money'], meaning: {} }, '45': { tone: 'bad', topics: ['health'], meaning: {} } },
-    sums: { '44': { tone: 'neutral', topics: [], meaning: {} } },
+    pairs: { '24': good, '42': good, '45': good, '56': good, '78': bad },
+    sums: { '44': { tone: 'good', topics: [], meaning: {} } },
   };
   const r = analyzeThaiMobile('0812345678', sample);
   assert.equal(r.sum, 44);
-  assert.deepEqual(r.pairs.map((p) => p.pair), ['81', '12', '23', '34', '45', '56', '67', '78']);
-  assert.deepEqual(r.score, { good: 1, bad: 1, neutral: 0, unknown: 6 });
-  assert.equal(r.sumRule?.tone, 'neutral');
+  assert.deepEqual(r.pairs.map((p) => p.pair), ['23', '34', '45', '56', '67', '78']);
+  assert.equal(r.pairs.at(-1)!.last, true);
+  assert.deepEqual(r.score, { good: 2, bad: 1, mixed: 0, unknown: 3 });
+  // 2 好 − 最后一对坏 ×2 + 总和好 1 = 1 → fair；最后一对坏
+  assert.equal(r.verdict, 'fair');
+  assert.deepEqual(r.warnings, ['last-pair-bad']);
+  assert.deepEqual(r.strengths, ['money']);
   assert.throws(() => analyzeThaiMobile('021234567'));
+});
+
+test('69/96 不宜放在最后一对', () => {
+  assert.deepEqual(analyzeThaiMobile('0812345696').warnings, ['last-pair-69']);
 });
