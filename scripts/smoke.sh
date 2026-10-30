@@ -7,7 +7,7 @@ BASE=http://localhost:3000
 LOG=$(mktemp)
 (cd apps/web && pnpm exec next start --port 3000 >"$LOG" 2>&1) &
 SERVER_PID=$!
-trap 'kill $SERVER_PID 2>/dev/null || true; echo "--- 服务器日志 ---"; tail -n 40 "$LOG"' EXIT
+trap 'kill $SERVER_PID 2>/dev/null || true; pkill -f "next start" 2>/dev/null || true; echo "--- 服务器日志 ---"; tail -n 40 "$LOG"' EXIT
 
 for i in $(seq 1 60); do
   curl -fsS "$BASE/api/health" >/dev/null 2>&1 && break
@@ -90,13 +90,20 @@ done
 
 # 正式版模式：即使误设 ENABLE_TEST_LOGIN=true，测试账号也必须关闭
 kill $SERVER_PID 2>/dev/null || true
-wait $SERVER_PID 2>/dev/null || true
+pkill -f "next start" 2>/dev/null || true
+pkill -f "next-server" 2>/dev/null || true
+for i in $(seq 1 30); do
+  curl -fsS "$BASE/api/health" >/dev/null 2>&1 || break
+  sleep 1
+done
 (cd apps/web && APP_ENV=production ENABLE_TEST_LOGIN=true pnpm exec next start --port 3000 >"$LOG" 2>&1) &
 SERVER_PID=$!
 for i in $(seq 1 60); do
   curl -fsS "$BASE/api/health" >/dev/null 2>&1 && break
   sleep 1
 done
+check "正式版模式健康检查" 200 "$BASE/api/health"
+contains "健康检查显示 production" '"env":"production"'
 code=$(curl -s -o /tmp/smoke-body -w "%{http_code}" -X POST "$BASE/api/auth/sign-up/email" \
   -H "Content-Type: application/json" -H "Origin: $BASE" \
   -d '{"name":"CI2","email":"ci2@example.com","password":"ci-password-123"}')
