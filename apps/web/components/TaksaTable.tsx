@@ -1,11 +1,12 @@
 import { PLANETS, TAKSA_HOUSES, HOUSE_NAMES, taksaChart, type ThaiBirthDayKey } from '@lucky/core';
 import type { Locale, Messages } from '@lucky/content';
+import { paren } from '@/lib/format';
 
 /** 某生日星期的ทักษา八宫表 */
 export function TaksaTable({ day, locale, t }: { day: ThaiBirthDayKey; locale: Locale; t: Messages['taksa'] }) {
   const chart = taksaChart(day);
   const kalakini = PLANETS[chart.kalakini];
-  const lettersOf = (p: (typeof PLANETS)[keyof typeof PLANETS]) => (p.key === 'sun' ? `${t.vowels}（อ ะ า …）` : p.letters.join(' '));
+  const lettersOf = (p: (typeof PLANETS)[keyof typeof PLANETS]) => (p.key === 'sun' ? paren(locale, t.vowels, 'อ ะ า …') : p.letters.join(' '));
 
   return (
     <section className="taksa">
@@ -46,7 +47,8 @@ export function TaksaTable({ day, locale, t }: { day: ThaiBirthDayKey; locale: L
         </table>
       </div>
       <p className="kalakini-note">
-        <strong>{t.kalakiniLetters}：</strong> {lettersOf(kalakini)}
+        <strong className="block">{t.kalakiniLetters}</strong>
+        {lettersOf(kalakini)}
       </p>
     </section>
   );

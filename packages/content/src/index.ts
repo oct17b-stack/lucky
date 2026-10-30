@@ -32,5 +32,5 @@ export function format(template: string, values: Record<string, string | number>
 }
 
 export { renderBaziReading, type ConclusionLike } from './rules/bazi.ts';
-export { SIAMSI, type SiamsiStick } from './rules/siamsi.ts';
+export { SIAMSI, SIAMSI_TOPICS, type SiamsiStick, type SiamsiTopic } from './rules/siamsi.ts';
 export { TAROT_MAJOR, type TarotCard } from './rules/tarot.ts';

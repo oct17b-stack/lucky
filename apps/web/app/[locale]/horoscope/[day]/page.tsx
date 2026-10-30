@@ -6,6 +6,7 @@ import { HOUSE_NAMES, THAI_BIRTH_DAYS, dailyTaksaReading, todayIn, type ThaiBirt
 import { ShareButtons } from '@/components/ShareButtons';
 import { addDays } from '@/lib/calendar';
 import { formatDateFull, formatDateShort } from '@/lib/dates';
+import { paren } from '@/lib/format';
 import { alternatesFor, resolveLocale } from '@/lib/site';
 
 type Props = { params: Promise<{ locale: string; day: string }> };
@@ -36,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function houseLabel(h: keyof typeof HOUSE_NAMES, locale: Locale): string {
-  return locale === 'th' ? HOUSE_NAMES[h].th : `${HOUSE_NAMES[h][locale]}（${HOUSE_NAMES[h].th}）`;
+  return locale === 'th' ? HOUSE_NAMES[h].th : paren(locale, HOUSE_NAMES[h][locale], HOUSE_NAMES[h].th);
 }
 
 export default async function HoroscopePage({ params }: Props) {
@@ -53,6 +54,10 @@ export default async function HoroscopePage({ params }: Props) {
       <section className={`horoscope-card house-${r.house}`}>
         <h2>{format(m.horoscope.todayIs, { house: houseLabel(r.house, locale) })}</h2>
         <p>{m.horoscope.themes[r.house]}</p>
+        <p className="merit">
+          <strong className="block">{m.horoscope.meritTitle}</strong>
+          {m.horoscope.merit[r.house]}
+        </p>
         <dl className="facts">
           <dt>{m.horoscope.luckyNumbers}</dt>
           <dd className="big-number">{r.luckyNumbers.join(' · ')}</dd>
@@ -95,7 +100,7 @@ function WeekList({ birthDay, locale, m }: { birthDay: ThaiBirthDayKey; locale: 
           <li key={i} className={r.house === 'kalakini' ? 'kalakini' : undefined}>
             <span className="week-date">{formatDateShort(locale, d)}</span>
             <strong>{houseLabel(r.house, locale)}</strong>
-            <span className="hint">{m.horoscope.themes[r.house]}</span>
+            <span className="hint">{m.taksa.houses[r.house]}</span>
           </li>
         );
       })}

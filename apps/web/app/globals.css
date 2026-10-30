@@ -993,3 +993,80 @@ a {
     grid-column: 1;
   }
 }
+
+.how-to {
+  text-align: left;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 14px 36px;
+  margin: 0;
+}
+
+.how-to li {
+  margin: 4px 0;
+}
+
+.fortune {
+  text-align: left;
+}
+
+.fortune-label {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 16px 0 4px;
+}
+
+.fortune-verse {
+  white-space: pre-line;
+  font-size: 18px;
+  line-height: 1.9;
+  border-left: 3px solid var(--gold);
+  padding-left: 12px;
+  margin: 0;
+}
+
+.fortune-topics {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.fortune-topics div {
+  display: grid;
+  grid-template-columns: 9em 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.fortune-topics dt {
+  color: var(--muted);
+}
+
+.fortune-topics dd {
+  margin: 0;
+}
+
+.merit {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f9eeda;
+  color: #5c4310;
+}
+
+@media (prefers-color-scheme: dark) {
+  .merit {
+    background: #3a2f18;
+    color: #f0dcae;
+  }
+}
+
+@media (max-width: 560px) {
+  .fortune-topics div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

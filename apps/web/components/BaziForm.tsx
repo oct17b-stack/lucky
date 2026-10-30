@@ -19,6 +19,7 @@ import {
   type ZiHourRule,
 } from '@lucky/core';
 import { format, renderBaziReading, type Locale, type Messages } from '@lucky/content';
+import { paren } from '@/lib/format';
 import { BirthInput, DEFAULT_BIRTH, isValidBirthDate, type BirthValue } from './BirthInput';
 
 const ELEMENT_CLASS: Record<string, string> = { 木: 'el-wood', 火: 'el-fire', 土: 'el-earth', 金: 'el-metal', 水: 'el-water' };
@@ -213,7 +214,7 @@ export function BaziForm({ locale, m }: { locale: Locale; m: Messages }) {
           <dl className="facts">
             <dt>{r.dayMaster}</dt>
             <dd>
-              {result.dayMaster.stem}（{result.dayMaster.element}）
+              {paren(locale, result.dayMaster.stem, result.dayMaster.element)}
             </dd>
             <dt>{r.zodiac}</dt>
             <dd>{result.zodiac}</dd>

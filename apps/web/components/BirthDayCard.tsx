@@ -1,5 +1,6 @@
-import type { ThaiBirthDayInfo } from '@lucky/core';
+import { PLANETS, planetOfBirthDay, type ThaiBirthDayInfo } from '@lucky/core';
 import type { Locale, Messages } from '@lucky/content';
+import { paren } from '@/lib/format';
 
 export function BirthDayCard({ info, locale, t }: { info: ThaiBirthDayInfo; locale: Locale; t: Messages['birthday'] }) {
   return (
@@ -9,7 +10,7 @@ export function BirthDayCard({ info, locale, t }: { info: ThaiBirthDayInfo; loca
         <dt>{t.yourDay}</dt>
         <dd>{info.name[locale]}</dd>
         <dt>{t.color}</dt>
-        <dd>{locale === 'th' ? info.color.th : `${info.color.en}（${info.color.th}）`}</dd>
+        <dd>{locale === 'th' ? info.color.th : paren(locale, PLANETS[planetOfBirthDay(info.key)].color[locale], info.color.th)}</dd>
         <dt>{t.buddha}</dt>
         <dd>{info.buddha.th}</dd>
         <dt>{t.planet}</dt>

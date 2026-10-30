@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { HOUSE_NAMES, ZODIAC_NAMES, compatibility, zodiacIndexFor, type CompatibilityResult, type ZodiacYearRule } from '@lucky/core';
 import { format, type Locale, type Messages } from '@lucky/content';
 import { birthDayKeyOf } from '@/lib/birth';
+import { paren } from '@/lib/format';
 import { BirthInput, DEFAULT_BIRTH, isValidBirthDate, type BirthValue } from './BirthInput';
 import { ShareButtons } from './ShareButtons';
 import { ZodiacRuleSelect } from './ZodiacRuleSelect';
@@ -32,7 +33,7 @@ export function CompatibilityForm({ locale, m }: { locale: Locale; m: Messages }
     );
   }
 
-  const house = (h: keyof typeof HOUSE_NAMES) => (locale === 'th' ? HOUSE_NAMES[h].th : `${HOUSE_NAMES[h][locale]}（${HOUSE_NAMES[h].th}）`);
+  const house = (h: keyof typeof HOUSE_NAMES) => (locale === 'th' ? HOUSE_NAMES[h].th : paren(locale, HOUSE_NAMES[h][locale], HOUSE_NAMES[h].th));
 
   return (
     <>

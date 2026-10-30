@@ -38,9 +38,19 @@ test('เซียมซี 28 签、塔罗 22 张，四语齐全', async () => 
   assert.deepEqual(SIAMSI.map((s) => s.n), Array.from({ length: 28 }, (_, i) => i + 1));
   assert.equal(TAROT_MAJOR.length, 22);
   for (const locale of LOCALES) {
-    for (const s of SIAMSI) assert.ok(s.text[locale].length > 5, `签 ${s.n} ${locale}`);
+    for (const s of SIAMSI) {
+      assert.ok(s.verse[locale].length > 10 && s.summary[locale].length > 5, `签 ${s.n} ${locale}`);
+      for (const topic of ['work', 'money', 'love', 'health', 'lost'] as const) assert.ok(s.topics[topic][locale].length > 1, `签 ${s.n} ${topic} ${locale}`);
+    }
     for (const c of TAROT_MAJOR) {
       assert.ok(c.name[locale] && c.upright[locale] && c.reversed[locale], `塔罗 ${c.n} ${locale}`);
     }
+  }
+});
+
+test('签文：病痛相关的下签都提醒就医', async () => {
+  const { SIAMSI } = await import('../src/index.ts');
+  for (const s of SIAMSI.filter((x) => x.level === 'caution')) {
+    assert.match(s.topics.health.th, /แพทย์/, `签 ${s.n}`);
   }
 });
