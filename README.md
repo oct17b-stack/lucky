@@ -16,9 +16,10 @@ packages/
   api/        三端共享的接口类型
   db/         业务数据表（Drizzle ORM + PostgreSQL）；账号表由 Better Auth 管理
 deploy/
-  qnap/       威联通 NAS 测试版：docker compose、Cloudflare Tunnel、备份
+  qnap/       威联通 NAS 内网测试版（只在局域网访问，测试账号登录）
+  production/ 正式版：云服务器 + Caddy 自动 HTTPS、备份
 .github/
-  workflows/  CI 测试构建；main 分支自动构建 amd64 + arm64 测试版镜像
+  workflows/  CI 测试构建；main 分支自动构建内网测试版镜像；v* 标签构建正式版镜像
 ```
 
 ## 本地开发
@@ -37,9 +38,9 @@ pnpm dev:mobile           # 启动 Expo，用 Expo Go 扫码
 
 本地登录调试：复制 `apps/web/.env.example` 为 `apps/web/.env.local` 并填写。
 
-**上线配置教程**（GitHub、LINE、Google、Cloudflare、威联通 NAS，一步一步）：[docs/setup-guide.md](docs/setup-guide.md)
+**配置教程**（内网测试版、正式服务器、LINE/Google 登录、App 构建，一步一步）：[docs/setup-guide.md](docs/setup-guide.md)
 
-App 连接测试版接口：在 `apps/mobile/.env` 写入 `EXPO_PUBLIC_API_URL=https://beta.你的域名`。
+App 有内网测试版和正式版两种构建，服务器地址在 `apps/mobile/eas.json` 里设置；本地调试可在 `apps/mobile/.env` 写入 `EXPO_PUBLIC_API_URL=http://电脑或NAS的IP:3000`。
 
 ## 计算核心说明
 
@@ -64,13 +65,19 @@ App 连接测试版接口：在 `apps/mobile/.env` 写入 `EXPO_PUBLIC_API_URL=h
 
 **阶段 0 验收门槛**：通过 `setSunLongitudeProvider()` 接入 astronomy-engine（MIT）或 Swiss Ephemeris，把 `packages/core/test/astro.test.ts` 的容差从 20 分钟收紧到 1 分钟，并把金标准测试集扩充到 500 例以上。
 
-## 测试版（威联通 NAS）
+## 部署
 
-见 [deploy/qnap/README.md](deploy/qnap/README.md)。需要在 GitHub 仓库的 Settings → Variables 中设置 `STAGING_URL`（例如 `https://beta.example.com`）。
+| 环境 | 位置 | 说明 |
+| --- | --- | --- |
+| 内网测试版 | 威联通 NAS | [deploy/qnap/README.md](deploy/qnap/README.md)，仓库变量 `LAN_URL` |
+| 正式版 | 云服务器 | [deploy/production/README.md](deploy/production/README.md)，仓库变量 `PROD_URL` |
+
+两者都不需要内网穿透。
 
 ## 待办（需要外部配合）
 
 - [ ] 泰语母语者终审全部泰文（签文、运势、数字含义等，已初审）
 - [ ] Google / LINE 登录密钥（见 docs/login-setup.md）
-- [ ] NAS 测试版上线（见 deploy/qnap/README.md）
+- [ ] NAS 内网测试版上线（见 deploy/qnap/README.md）
+- [ ] 购买云服务器和域名，部署正式版（见 deploy/production/README.md）
 - [ ] 导入 GeoNames 城市库；LINE 官方账号每日推送

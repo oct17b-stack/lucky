@@ -1,7 +1,8 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
 
-const isStaging = process.env.APP_ENV === 'staging';
+// 只有正式版允许收录，其余环境（内网版、本地开发）全部 noindex
+const isStaging = process.env.APP_ENV !== 'production';
 
 const nextConfig: NextConfig = {
   // 独立输出：Docker 镜像只需要 .next/standalone，适合部署到 NAS

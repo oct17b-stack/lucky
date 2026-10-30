@@ -1,0 +1,75 @@
+# 正式版：部署在云服务器（推荐新加坡机房，泰国访问延迟低）
+# Caddy 自动申请和续期 HTTPS 证书，不需要穿透
+# 详细步骤见 docs/setup-guide.md 第二部分
+
+name: lucky-prod
+
+services:
+  web:
+    image: ghcr.io/oct17b-stack/lucky-web:${LUCKY_TAG:-prod}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # 正式版固定为 production：测试账号登录被强制关闭，允许搜索引擎收录
+      APP_ENV: production
+      ENABLE_TEST_LOGIN: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      AUTO_MIGRATE: "true"
+      BETTER_AUTH_URL: https://${SITE_DOMAIN}
+      NEXT_PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # 不对外暴露端口，只通过 Caddy 访问
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/caddy:/data
+    depends_on:
+      - web
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # 每晚导出数据库，保留 30 天。建议再把 data/backups 同步到别处（例如 NAS）
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        while true; do
+          pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} | gzip > /backups/lucky-$$(date +%F).sql.gz;
+          find /backups -name 'lucky-*.sql.gz' -mtime +30 -delete;
+          sleep 86400;
+        done

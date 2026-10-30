@@ -70,10 +70,38 @@ for provider in google line; do
   if echo "$body" | grep -q "$host"; then echo "通过  $provider 登录跳转到 $host"; else echo "失败  $provider 登录跳转：$body"; fail=1; fi
 done
 
+# 测试账号（内网版）：注册后带 cookie 能拿到会话
+check "登录页显示测试账号表单" 200 "$BASE/th/login"
+contains "测试账号表单" "บัญชีทดสอบ"
+JAR=$(mktemp)
+code=$(curl -s -o /tmp/smoke-body -w "%{http_code}" -c "$JAR" -X POST "$BASE/api/auth/sign-up/email" \
+  -H "Content-Type: application/json" -H "Origin: $BASE" \
+  -d '{"name":"CI","email":"ci@example.com","password":"ci-password-123"}')
+if [ "$code" = "200" ]; then echo "通过  测试账号注册（200）"; else echo "失败  测试账号注册：$code $(head -c 300 /tmp/smoke-body)"; fail=1; fi
+check "测试账号会话" 200 "$BASE/api/auth/get-session" -b "$JAR"
+contains "会话包含测试邮箱" "ci@example.com"
+check "登录后可访问我的页面" 200 "$BASE/th/me" -b "$JAR"
+
 # 自动建表
 tables=$(PGPASSWORD=ci psql -h localhost -U postgres -tAc "select string_agg(table_name, ',' order by table_name) from information_schema.tables where table_schema='public'")
 for t in account session user verification; do
   if echo ",$tables," | grep -q ",$t,"; then echo "通过  已自动创建表 $t"; else echo "失败  缺少表 $t（现有：$tables）"; fail=1; fi
 done
+
+# 正式版模式：即使误设 ENABLE_TEST_LOGIN=true，测试账号也必须关闭
+kill $SERVER_PID 2>/dev/null || true
+wait $SERVER_PID 2>/dev/null || true
+(cd apps/web && APP_ENV=production ENABLE_TEST_LOGIN=true pnpm exec next start --port 3000 >"$LOG" 2>&1) &
+SERVER_PID=$!
+for i in $(seq 1 60); do
+  curl -fsS "$BASE/api/health" >/dev/null 2>&1 && break
+  sleep 1
+done
+code=$(curl -s -o /tmp/smoke-body -w "%{http_code}" -X POST "$BASE/api/auth/sign-up/email" \
+  -H "Content-Type: application/json" -H "Origin: $BASE" \
+  -d '{"name":"CI2","email":"ci2@example.com","password":"ci-password-123"}')
+if [ "$code" != "200" ]; then echo "通过  正式版拒绝测试账号注册（$code）"; else echo "失败  正式版居然允许测试账号注册"; fail=1; fi
+check "正式版登录页" 200 "$BASE/th/login"
+if grep -q "บัญชีทดสอบ" /tmp/smoke-body; then echo "失败  正式版登录页出现测试账号表单"; fail=1; else echo "通过  正式版登录页没有测试账号表单"; fi
 
 exit $fail

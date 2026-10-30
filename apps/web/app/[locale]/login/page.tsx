@@ -3,7 +3,8 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getMessages } from '@lucky/content';
 import { LoginButtons } from '@/components/LoginButtons';
-import { auth, enabledProviders } from '@/lib/auth';
+import { TestLoginForm } from '@/components/TestLoginForm';
+import { auth, enabledProviders, testLoginEnabled } from '@/lib/auth';
 import { resolveLocale } from '@/lib/site';
 
 type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string }> };
@@ -27,11 +28,9 @@ export default async function LoginPage({ params, searchParams }: Props) {
       <h1>{t.title}</h1>
       <p className="lead">{t.subtitle}</p>
       {error && <p className="error">{t.failed}</p>}
-      {enabledProviders.length > 0 ? (
-        <LoginButtons providers={enabledProviders} locale={locale} t={t} />
-      ) : (
-        <p className="hint">{t.notConfigured}</p>
-      )}
+      {enabledProviders.length > 0 && <LoginButtons providers={enabledProviders} locale={locale} t={t} />}
+      {testLoginEnabled && <TestLoginForm locale={locale} t={t} />}
+      {enabledProviders.length === 0 && !testLoginEnabled && <p className="hint">{t.notConfigured}</p>}
       <p className="hint">{t.terms}</p>
     </article>
   );

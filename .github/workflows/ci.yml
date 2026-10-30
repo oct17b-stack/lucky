@@ -52,6 +52,7 @@ jobs:
           AUTO_MIGRATE: "true"
           BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
           BETTER_AUTH_URL: http://localhost:3000
+          ENABLE_TEST_LOGIN: "true"
           GOOGLE_CLIENT_ID: ci-google-id
           GOOGLE_CLIENT_SECRET: ci-google-secret
           LINE_CLIENT_ID: "1234567890"

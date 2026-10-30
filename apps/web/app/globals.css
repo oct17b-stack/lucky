@@ -1157,3 +1157,18 @@ a {
     grid-column: 1 / -1;
   }
 }
+
+.test-login {
+  border-style: dashed;
+}
+
+.link-button {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  justify-self: start;
+  text-decoration: underline;
+}

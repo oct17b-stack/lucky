@@ -2,7 +2,9 @@ import { LOCALES, LOCALE_META, isLocale, type Locale } from '@lucky/content';
 import { notFound } from 'next/navigation';
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-export const IS_STAGING = process.env.APP_ENV === 'staging';
+/** 只有正式版允许搜索引擎收录；内网版、测试版、本地开发一律 noindex 并显示测试横幅 */
+export const IS_PRODUCTION = process.env.APP_ENV === 'production';
+export const IS_STAGING = !IS_PRODUCTION;
 
 /** 公开页面列表：用于站点地图和 hreflang */
 export const PUBLIC_PATHS = [

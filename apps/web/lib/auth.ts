@@ -1,7 +1,8 @@
 /**
  * 账号系统：Better Auth + PostgreSQL（pg 连接池，纯 JavaScript，可跨 CPU 架构运行）。
  *
- * 登录方式：Google、LINE（只启用已配置了密钥的方式）。
+ * 登录方式：Google、LINE（只启用已配置了密钥的方式）；
+ * 内网测试版另有“测试账号”（邮箱 + 密码），见 testLoginEnabled。
  * 账号表（user / session / account / verification）由 Better Auth 管理，
  * AUTO_MIGRATE=true 时在服务启动时自动创建（见 instrumentation.ts）。
  */
@@ -13,6 +14,13 @@ const env = process.env;
 
 const googleEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 const lineEnabled = Boolean(env.LINE_CLIENT_ID && env.LINE_CLIENT_SECRET);
+
+/**
+ * 测试账号登录（邮箱 + 密码）：只用于内网测试版。
+ * Google、LINE 不允许局域网 IP 作为回调地址，所以内网版用它代替。
+ * 需要显式设置 ENABLE_TEST_LOGIN=true，且 APP_ENV 为 production 时无论如何都不开启。
+ */
+export const testLoginEnabled = env.ENABLE_TEST_LOGIN === 'true' && env.APP_ENV !== 'production';
 
 export type LoginProvider = 'line' | 'google';
 
@@ -33,6 +41,7 @@ export const auth = betterAuth({
       locale: { type: 'string', required: false, defaultValue: 'th' },
     },
   },
+  emailAndPassword: { enabled: testLoginEnabled, minPasswordLength: 8, autoSignIn: true },
   account: {
     // 同一个邮箱用 Google 和 LINE 登录时合并为同一个账号
     accountLinking: { enabled: true, trustedProviders: ['google', 'line'] },

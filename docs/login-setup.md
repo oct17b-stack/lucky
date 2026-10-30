@@ -1,6 +1,8 @@
 # Google 和 LINE 登录配置
 
-> 完整的分步教程（含测试版部署和常见问题）见 [setup-guide.md](setup-guide.md)，本页是登录部分的摘要。
+> 完整的分步教程见 [setup-guide.md](setup-guide.md) 第二部分，本页是登录部分的摘要。
+>
+> LINE、Google 登录只在**正式版**（https 域名）和本地开发（localhost）可用。内网测试版用测试账号登录，见下文。
 
 网站使用 Better Auth，回调地址固定为：
 
@@ -9,7 +11,7 @@
 | Google | `https://你的域名/api/auth/callback/google` |
 | LINE | `https://你的域名/api/auth/callback/line` |
 
-本地开发把域名换成 `http://localhost:3000`，测试版换成 `https://beta.你的域名`。每个环境的地址都要在后台登记，必须完全一致。
+本地开发把域名换成 `http://localhost:3000`。每个环境的地址都要在后台登记，必须完全一致。局域网 IP（如 `http://192.168.1.100:3000`）不被 LINE 和 Google 接受。
 
 只有填了密钥的登录方式才会显示在登录页上，所以可以先只开通其中一种。
 
@@ -38,13 +40,15 @@
 
 ## 其他必填项
 
-- `BETTER_AUTH_SECRET`：随机字符串，用 `openssl rand -base64 32` 生成；正式版和测试版要用不同的值
+- `BETTER_AUTH_SECRET`：随机字符串，用 `openssl rand -base64 32` 生成；正式版和内网版要用不同的值
 - `BETTER_AUTH_URL`：网站的完整地址，和回调地址的域名一致
 - `DATABASE_URL`：PostgreSQL 连接串；`AUTO_MIGRATE=true` 时，启动时会自动创建账号表
 
-## 测试版注意
+## 内网测试版：测试账号
 
-测试版前面有 Cloudflare Access。测试用户先通过 Access 的邮箱验证，再用 LINE 或 Google 登录网站，两者互不影响。
+- NAS 上的 `docker-compose.yml` 已设置 `ENABLE_TEST_LOGIN=true`，登录页会出现“测试账号”表单（邮箱 + 密码，密码至少 8 位）
+- 邮箱不需要真实存在，不发验证邮件
+- 只要 `APP_ENV=production`，测试账号就强制关闭，即使误设了 `ENABLE_TEST_LOGIN=true`。CI 的冒烟测试每次都会检查这一点
 
 ## App（后续）
 
