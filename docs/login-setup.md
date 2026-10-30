@@ -1,5 +1,7 @@
 # Google 和 LINE 登录配置
 
+> 完整的分步教程（含测试版部署和常见问题）见 [setup-guide.md](setup-guide.md)，本页是登录部分的摘要。
+
 网站使用 Better Auth，回调地址固定为：
 
 | 登录方式 | 回调地址 |

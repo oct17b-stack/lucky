@@ -35,7 +35,9 @@ pnpm dev:mobile           # 启动 Expo，用 Expo Go 扫码
 
 首次安装 App 依赖后，执行一次 `cd apps/mobile && npx expo install --fix`，把 Expo 相关包对齐到当前 SDK 的版本。安装完成后请提交生成的 `pnpm-lock.yaml`。
 
-本地登录调试：复制 `apps/web/.env.example` 为 `apps/web/.env.local` 并填写，Google 和 LINE 的后台配置见 [docs/login-setup.md](docs/login-setup.md)。
+本地登录调试：复制 `apps/web/.env.example` 为 `apps/web/.env.local` 并填写。
+
+**上线配置教程**（GitHub、LINE、Google、Cloudflare、威联通 NAS，一步一步）：[docs/setup-guide.md](docs/setup-guide.md)
 
 App 连接测试版接口：在 `apps/mobile/.env` 写入 `EXPO_PUBLIC_API_URL=https://beta.你的域名`。
 
