@@ -5,7 +5,22 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3
 export const IS_STAGING = process.env.APP_ENV === 'staging';
 
 /** 公开页面列表：用于站点地图和 hreflang */
-export const PUBLIC_PATHS = ['', '/calendar', '/bazi', '/lucky-color', '/phone-number'] as const;
+export const PUBLIC_PATHS = [
+  '',
+  '/daily-color',
+  '/horoscope',
+  '/lucky-color',
+  '/phone-number',
+  '/name',
+  '/license-plate',
+  '/compatibility',
+  '/siamsi',
+  '/tarot',
+  '/thai-zodiac',
+  '/wallpaper',
+  '/calendar',
+  '/bazi',
+] as const;
 
 export async function resolveLocale(params: Promise<{ locale: string }>): Promise<Locale> {
   const { locale } = await params;

@@ -5,6 +5,7 @@ import { LOCALES, LOCALE_META, getMessages } from '@lucky/content';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { UserMenu } from '@/components/UserMenu';
 import { IS_STAGING, SITE_URL, alternatesFor, resolveLocale } from '@/lib/site';
+import { TOOL_PATHS, navTools, toolLabel } from '@/lib/tools';
 import '../globals.css';
 
 const thaiFont = Noto_Sans_Thai({ subsets: ['thai', 'latin'], weight: ['400', '600', '700'], display: 'swap' });
@@ -42,10 +43,11 @@ export default async function LocaleLayout({ children, params }: Props) {
             {m.site.name}
           </Link>
           <nav className="site-nav">
-            <Link href={`/${locale}/calendar`}>{m.nav.calendar}</Link>
-            <Link href={`/${locale}/lucky-color`}>{m.nav.luckyColor}</Link>
-            <Link href={`/${locale}/phone-number`}>{m.nav.phone}</Link>
-            <Link href={`/${locale}/bazi`}>{m.nav.bazi}</Link>
+            {navTools(locale).map((key) => (
+              <Link key={key} href={`/${locale}${TOOL_PATHS[key]}`}>
+                {toolLabel(key, m, locale)}
+              </Link>
+            ))}
           </nav>
           <LanguageSwitcher current={locale} label={m.nav.language} />
           <UserMenu locale={locale} loginLabel={m.auth.login} />

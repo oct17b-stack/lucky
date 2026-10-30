@@ -64,6 +64,11 @@ export interface BaziInput {
   /** 出生地经度（东经为正） */
   longitude: number;
   gender: 'male' | 'female';
+  /**
+   * 是否知道出生时间（默认 true）。为 false 时 birth 的时分会被忽略：
+   * 按当天正午排年、月、日三柱，不排时柱；大运起运时间按正午估算。
+   */
+  hourKnown?: boolean;
   options?: Partial<BaziOptions>;
 }
 
@@ -93,10 +98,11 @@ export interface LuckPillar {
 }
 
 export interface BaziResult {
-  pillars: { year: Pillar; month: Pillar; day: Pillar; hour: Pillar };
+  /** 不知道出生时间时 hour 为 null */
+  pillars: { year: Pillar; month: Pillar; day: Pillar; hour: Pillar | null };
   dayMaster: { stem: string; element: string; yang: boolean };
   zodiac: string;
-  /** 八个字的五行计数（天干 + 地支本气） */
+  /** 八个字（不知道时间时为六个字）的五行计数（天干 + 地支本气） */
   elementCount: Record<string, number>;
   luck: {
     forward: boolean;
@@ -112,6 +118,11 @@ export interface BaziResult {
     /** 用于定日、定时的时间（真太阳时或钟表时间） */
     calcTime: string;
     lichun: string;
+    hourKnown: boolean;
+    /**
+     * 不知道出生时间且当天恰好交节或立春时，年柱或月柱取决于出生时刻，这里列出无法确定的柱
+     */
+    uncertain: ('year' | 'month')[];
   };
 }
 
@@ -138,6 +149,29 @@ function addDays(t: LocalDateTime, days: number): LocalDateTime {
 }
 
 export function computeBazi(input: BaziInput): BaziResult {
+  const hourKnown = input.hourKnown ?? true;
+  if (!hourKnown) {
+    const noon = computeBaziKnown({ ...input, birth: { ...input.birth, hour: 12, minute: 0 } });
+    const early = computeBaziKnown({ ...input, birth: { ...input.birth, hour: 0, minute: 0 } });
+    const late = computeBaziKnown({ ...input, birth: { ...input.birth, hour: 22, minute: 59 } });
+    const uncertain: ('year' | 'month')[] = [];
+    if (early.pillars.year.name !== late.pillars.year.name) uncertain.push('year');
+    if (early.pillars.month.name !== late.pillars.month.name) uncertain.push('month');
+    const hour = noon.pillars.hour!;
+    const elementCount = { ...noon.elementCount };
+    elementCount[hour.stemElement]! -= 1;
+    elementCount[hour.branchElement]! -= 1;
+    return {
+      ...noon,
+      pillars: { ...noon.pillars, hour: null },
+      elementCount,
+      meta: { ...noon.meta, hourKnown: false, uncertain },
+    };
+  }
+  return computeBaziKnown(input);
+}
+
+function computeBaziKnown(input: BaziInput): BaziResult {
   const options: BaziOptions = { ...DEFAULT_BAZI_OPTIONS, ...input.options };
   validateInput(input);
 
@@ -221,6 +255,8 @@ export function computeBazi(input: BaziInput): BaziResult {
       utcOffsetMinutes: offsetMinutes,
       calcTime: formatWallClock(calcTime),
       lichun: new Date(lichunUsed).toISOString(),
+      hourKnown: true,
+      uncertain: [],
     },
   };
 }

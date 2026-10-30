@@ -5,7 +5,7 @@
  * 评分规则全部写在这里，结果页会注明规则版本，便于用户核对、顾问校准。
  *
  * 评分：
- * - 年、月、时三个天干各 1 分（日干是日主本身，不计）
+ * - 年、月、时三个天干各 1 分（日干是日主本身，不计；不知道出生时间时没有时柱）
  * - 每个地支 1 分，按藏干分配：1 个藏干 1.0；2 个 0.7/0.3；3 个 0.6/0.3/0.1
  * - 月支（月令）权重加倍，计 2 分
  * - 帮身 = 与日主同五行（比劫）+ 生日主的五行（印）
@@ -59,13 +59,16 @@ export function interpretBazi(chart: BaziResult): BaziReading {
   const dm = stemElement(stemIdx(p.day.stem));
 
   const scores: Record<ElementIndex, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
-  for (const pillar of [p.year, p.month, p.hour]) scores[stemElement(stemIdx(pillar.stem))] += 1;
-  for (const [pillar, weight] of [
+  // 不知道出生时间时没有时柱，只按六个字评分
+  for (const pillar of [p.year, p.month, p.hour]) if (pillar) scores[stemElement(stemIdx(pillar.stem))] += 1;
+  const branchWeights = [
     [p.year, 1],
     [p.month, 2],
     [p.day, 1],
     [p.hour, 1],
-  ] as const) {
+  ] as const;
+  for (const [pillar, weight] of branchWeights) {
+    if (!pillar) continue;
     const hidden = HIDDEN_STEMS[branchIdx(pillar.branch)]!;
     const ws = HIDDEN_WEIGHTS[hidden.length]!;
     hidden.forEach((s, i) => (scores[stemElement(s)] += ws[i]! * weight));

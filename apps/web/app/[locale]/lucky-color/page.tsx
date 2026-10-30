@@ -20,7 +20,7 @@ export default async function LuckyColorPage({ params }: Props) {
     <article className="tool">
       <h1>{m.birthday.title}</h1>
       <p className="lead">{m.birthday.description}</p>
-      <BirthdayForm locale={locale} t={m.birthday} />
+      <BirthdayForm locale={locale} m={m} />
 
       <h2>{m.birthday.allDays}</h2>
       <ul className="day-grid">

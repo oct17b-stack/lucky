@@ -85,3 +85,11 @@ test('每日万年历', () => {
   assert.equal(dailyAlmanac(2024, 2, 5).solarTerm, null);
   assert.throws(() => dailyAlmanac(2024, 2, 30));
 });
+
+test('万年历包含泰国阴历和吉凶日', () => {
+  const a = dailyAlmanac(2026, 7, 29);
+  assert.equal(a.thaiLunar.secondEighth, true);
+  assert.equal(a.thaiLunar.holyDay, true);
+  const b = dailyAlmanac(2025, 6, 6);
+  assert.deepEqual(b.auspicious, ['thongchai', 'athibodi']);
+});

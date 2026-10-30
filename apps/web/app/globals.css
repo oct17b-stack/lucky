@@ -601,3 +601,395 @@ a {
   font-size: 20px;
   font-weight: 700;
 }
+
+/* ---------- 泰式功能 ---------- */
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.section-title {
+  margin-top: 40px;
+}
+
+.today-colors {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.today-colors h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.color-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.color-grid li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.color-grid li.avoid {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.big-swatch {
+  grid-row: 1 / span 2;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.color-purpose {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.color-name {
+  font-size: 17px;
+}
+
+.inline-swatch {
+  display: inline-block;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.birth-input {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.birth-date {
+  display: grid;
+  grid-template-columns: 0.8fr 1.6fr 1fr;
+  gap: 10px;
+}
+
+.small-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.form-section {
+  margin: 8px 0 0;
+  font-size: 17px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.taksa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.taksa-table th,
+.taksa-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.taksa-table tr.kalakini {
+  background: #fbebeb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .taksa-table tr.kalakini,
+  .week-list li.kalakini {
+    background: #3a2222;
+  }
+}
+
+.letters {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+}
+
+.kalakini-note {
+  margin-top: 12px;
+}
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.share-btn {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* LINE 品牌绿 */
+.share-line {
+  background: #06c755;
+  border-color: #06c755;
+  color: #fff;
+}
+
+.share-fb {
+  background: #1877f2;
+  border-color: #1877f2;
+  color: #fff;
+}
+
+.horoscope-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.horoscope-card.house-kalakini {
+  border-left-color: var(--fire);
+}
+
+.horoscope-card h2 {
+  margin-top: 0;
+}
+
+.week-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.week-list li {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  column-gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.week-list li .hint {
+  grid-column: 2;
+}
+
+.week-list li.kalakini {
+  background: #fbebeb;
+}
+
+.week-date {
+  color: var(--muted);
+  grid-row: 1 / span 2;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: var(--gold);
+  color: #fff;
+}
+
+.auspicious-thongchai,
+.auspicious-athibodi {
+  color: var(--wood);
+}
+
+.auspicious-ubat,
+.auspicious-lokawinat {
+  color: var(--fire);
+}
+
+.big-text {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.relation {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+
+.relation-sixHarmony,
+.relation-threeHarmony {
+  background: #e5f4e4;
+  color: #1f5f34;
+}
+
+.relation-clash,
+.relation-harm {
+  background: #fbebeb;
+  color: #8a1c1c;
+}
+
+.plate {
+  display: inline-block;
+  font-size: 28px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border: 2px solid var(--text);
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+}
+
+/* 求签与塔罗 */
+.draw {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.siamsi-cup.shaking {
+  animation: shake 0.25s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .siamsi-cup.shaking {
+    animation: none;
+  }
+}
+
+.fortune {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.fortune-number {
+  margin: 0;
+  color: var(--muted);
+}
+
+.fortune-level {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 4px 0 8px;
+}
+
+.level-caution .fortune-level {
+  color: var(--fire);
+}
+
+.fortune-text {
+  font-size: 17px;
+}
+
+.tarot-card {
+  width: 180px;
+  height: 300px;
+  border-radius: 14px;
+  border: 3px solid var(--gold);
+  background: linear-gradient(160deg, var(--accent), #3b0f16);
+  color: #f7e7c4;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  margin: 0 auto;
+}
+
+.tarot-card.back {
+  background: repeating-linear-gradient(45deg, var(--accent) 0 12px, #5a1620 12px 24px);
+}
+
+.tarot-card.reversed {
+  transform: rotate(180deg);
+}
+
+.tarot-numeral {
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.tarot-name {
+  font-size: 18px;
+  letter-spacing: 0.05em;
+}
+
+.tarot-result {
+  width: 100%;
+}
+
+.wallpaper {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.wallpaper .form {
+  width: 100%;
+}
+
+.wallpaper-preview {
+  width: 240px;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 560px) {
+  .birth-date {
+    grid-template-columns: 0.8fr 1.4fr 1fr;
+  }
+  .week-list li {
+    grid-template-columns: 1fr;
+  }
+  .week-date {
+    grid-row: auto;
+  }
+  .week-list li .hint {
+    grid-column: 1;
+  }
+}

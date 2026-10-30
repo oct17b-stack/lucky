@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ZODIAC_NAMES, solarTermLabel, type DailyAlmanac } from '@lucky/core';
+import { ZODIAC_NAMES, formatThaiLunar, solarTermLabel, type DailyAlmanac } from '@lucky/core';
 import { format, type Locale, type Messages } from '@lucky/content';
 import { addDays, formatYmd } from '@/lib/calendar';
+import { formatDateFull } from '@/lib/dates';
 
 function lunarText(a: DailyAlmanac, locale: Locale, t: Messages['calendar']): string {
   if (locale === 'zh-hans') return a.lunar.chinese;
@@ -9,17 +10,22 @@ function lunarText(a: DailyAlmanac, locale: Locale, t: Messages['calendar']): st
   return `${a.lunar.leap ? t.leapMark : ''}${format(t.lunarFormat, { month: a.lunar.month, day: a.lunar.day })}`;
 }
 
+/** 泰文显示佛历（พ.ศ.），其他语言显示公历 */
 function gregorianText(a: DailyAlmanac, locale: Locale): string {
-  const date = new Date(Date.UTC(a.date.year, a.date.month - 1, a.date.day));
-  const tag = locale === 'th' ? 'th-TH-u-ca-gregory' : locale === 'zh-hans' ? 'zh-CN' : locale === 'zh-hant' ? 'zh-TW' : 'en-GB';
-  return new Intl.DateTimeFormat(tag, { dateStyle: 'full', timeZone: 'UTC' }).format(date);
+  return formatDateFull(locale, a.date);
 }
 
 function termTime(utc: string): string {
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }).format(new Date(utc));
 }
 
-export function AlmanacView({ a, locale, t }: { a: DailyAlmanac; locale: Locale; t: Messages['calendar'] }) {
+function thaiLunarText(a: DailyAlmanac, locale: Locale, tl: Messages['thaiLunar']): string {
+  if (locale === 'th') return formatThaiLunar(a.thaiLunar);
+  const month = `${a.thaiLunar.month}${a.thaiLunar.secondEighth ? (locale === 'en' ? ' (2nd)' : '（后）') : ''}`;
+  return format(tl.format, { side: a.thaiLunar.waxing ? tl.waxing : tl.waning, day: a.thaiLunar.day, month });
+}
+
+export function AlmanacView({ a, locale, t, tl }: { a: DailyAlmanac; locale: Locale; t: Messages['calendar']; tl: Messages['thaiLunar'] }) {
   const prev = formatYmd(addDays(a.date, -1));
   const next = formatYmd(addDays(a.date, 1));
   const animal = ZODIAC_NAMES[locale][a.clashZodiacIndex]!;
@@ -33,6 +39,24 @@ export function AlmanacView({ a, locale, t }: { a: DailyAlmanac; locale: Locale;
         </p>
       </div>
       <dl className="facts">
+        <dt>{tl.title}</dt>
+        <dd>
+          {thaiLunarText(a, locale, tl)}
+          {a.thaiLunar.holyDay && <span className="badge holy">{tl.holyDay}</span>}
+          <span className="hint block">{tl.yearType[a.thaiLunar.yearType]}</span>
+        </dd>
+        {a.auspicious.length > 0 && (
+          <>
+            <dt>{tl.auspicious}</dt>
+            <dd>
+              {a.auspicious.map((k) => (
+                <span key={k} className={`block auspicious-${k}`}>
+                  {tl[k]}
+                </span>
+              ))}
+            </dd>
+          </>
+        )}
         <dt>{t.buddhist}</dt>
         <dd>{a.buddhistYear}</dd>
         <dt>{t.ganzhi}</dt>

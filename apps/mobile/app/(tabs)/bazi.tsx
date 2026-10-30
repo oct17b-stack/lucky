@@ -61,9 +61,9 @@ export default function BaziScreen() {
           {(['year', 'month', 'day', 'hour'] as const).map((k) => (
             <View key={k} style={styles.pillar}>
               <Text style={styles.label}>{r[k]}</Text>
-              <Text style={styles.glyph}>{result.pillars[k].stem}</Text>
-              <Text style={styles.glyph}>{result.pillars[k].branch}</Text>
-              <Text style={styles.small}>{result.pillars[k].stemTenGod ?? r.dayMaster}</Text>
+              <Text style={styles.glyph}>{result.pillars[k]?.stem ?? '—'}</Text>
+              <Text style={styles.glyph}>{result.pillars[k]?.branch ?? '—'}</Text>
+              <Text style={styles.small}>{result.pillars[k] ? (result.pillars[k]!.stemTenGod ?? r.dayMaster) : ''}</Text>
             </View>
           ))}
         </View>

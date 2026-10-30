@@ -9,14 +9,14 @@ export function formatYmd(d: YMD): string {
   return `${d.year}-${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
 }
 
-/** 解析 YYYY-MM-DD；无效或超出 1901–2099 返回 null */
+/** 解析 YYYY-MM-DD；无效或超出 1902–2098 返回 null */
 export function parseYmd(s: string): YMD | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
   if (!m) return null;
   const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
   const d = new Date(Date.UTC(year, month - 1, day));
   if (d.getUTCFullYear() !== year || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return null;
-  if (year < 1901 || year > 2099) return null;
+  if (year < 1902 || year > 2098) return null;
   return { year, month, day };
 }
 

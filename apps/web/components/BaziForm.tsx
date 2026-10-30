@@ -19,6 +19,7 @@ import {
   type ZiHourRule,
 } from '@lucky/core';
 import { format, renderBaziReading, type Locale, type Messages } from '@lucky/content';
+import { BirthInput, DEFAULT_BIRTH, isValidBirthDate, type BirthValue } from './BirthInput';
 
 const ELEMENT_CLASS: Record<string, string> = { 木: 'el-wood', 火: 'el-fire', 土: 'el-earth', 金: 'el-metal', 水: 'el-water' };
 
@@ -28,11 +29,11 @@ interface Outcome {
   lunar: LunarDate;
 }
 
-export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] }) {
+export function BaziForm({ locale, m }: { locale: Locale; m: Messages }) {
+  const t = m.bazi;
   const [calendar, setCalendar] = useState<'solar' | 'lunar'>('solar');
-  const [date, setDate] = useState('1990-06-15');
+  const [birth, setBirth] = useState<BirthValue>(DEFAULT_BIRTH);
   const [lunar, setLunar] = useState({ year: 1990, month: 5, day: 23, leap: false });
-  const [time, setTime] = useState('08:30');
   const [cityId, setCityId] = useState('bangkok');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [trueSolarTime, setTrueSolarTime] = useState(true);
@@ -43,23 +44,22 @@ export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] })
   function submit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      let y: number | undefined, mo: number | undefined, d: number | undefined;
-      if (calendar === 'lunar') {
-        ({ year: y, month: mo, day: d } = lunarToSolar(lunar.year, lunar.month, lunar.day, lunar.leap));
-      } else {
-        [y, mo, d] = date.split('-').map(Number);
-      }
-      const [h, mi] = time.split(':').map(Number);
+      const date =
+        calendar === 'lunar'
+          ? lunarToSolar(lunar.year, lunar.month, lunar.day, lunar.leap)
+          : { year: birth.year, month: birth.month, day: birth.day };
+      if (calendar === 'solar' && !isValidBirthDate(birth)) throw new Error('invalid');
       const city = CITIES.find((c) => c.id === cityId);
-      if (!city || !y || !mo || !d || h === undefined || mi === undefined) throw new Error('invalid');
+      if (!city) throw new Error('invalid');
       const chart = computeBazi({
-        birth: { year: y, month: mo, day: d, hour: h, minute: mi },
+        birth: { ...date, hour: birth.hour, minute: birth.minute },
+        hourKnown: birth.hourKnown,
         timeZone: city.timeZone,
         longitude: city.lng,
         gender,
         options: { trueSolarTime, ziHour },
       });
-      setOutcome({ chart, reading: interpretBazi(chart), lunar: solarToLunar(y, mo, d) });
+      setOutcome({ chart, reading: interpretBazi(chart), lunar: solarToLunar(date.year, date.month, date.day) });
       setError(null);
     } catch {
       setOutcome(null);
@@ -84,52 +84,63 @@ export function BaziForm({ locale, t }: { locale: Locale; t: Messages['bazi'] })
           </label>
         </fieldset>
         {calendar === 'solar' ? (
-          <label>
-            {f.date}
-            <input type="date" value={date} min="1901-02-19" max="2099-12-31" onChange={(e) => setDate(e.target.value)} required />
-          </label>
+          <BirthInput locale={locale} t={m.birthInput} value={birth} onChange={setBirth} />
         ) : (
-          <div className="lunar-fields">
+          <>
+            <div className="lunar-fields">
+              <label>
+                {f.lunarYear}
+                <input
+                  type="number"
+                  min={1901}
+                  max={2099}
+                  value={lunar.year}
+                  onChange={(e) => setLunar({ ...lunar, year: Number(e.target.value) })}
+                  required
+                />
+              </label>
+              <label>
+                {f.lunarMonth}
+                <select value={lunar.month} onChange={(e) => setLunar({ ...lunar, month: Number(e.target.value) })}>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {f.lunarDay}
+                <select value={lunar.day} onChange={(e) => setLunar({ ...lunar, day: Number(e.target.value) })}>
+                  {Array.from({ length: 30 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="inline">
+                <input type="checkbox" checked={lunar.leap} onChange={(e) => setLunar({ ...lunar, leap: e.target.checked })} /> {f.leapMonth}
+              </label>
+            </div>
             <label>
-              {f.lunarYear}
+              {m.birthInput.time}
               <input
-                type="number"
-                min={1901}
-                max={2099}
-                value={lunar.year}
-                onChange={(e) => setLunar({ ...lunar, year: Number(e.target.value) })}
-                required
+                type="time"
+                disabled={!birth.hourKnown}
+                value={`${String(birth.hour).padStart(2, '0')}:${String(birth.minute).padStart(2, '0')}`}
+                onChange={(e) => {
+                  const [h = 0, mi = 0] = e.target.value.split(':').map(Number);
+                  setBirth({ ...birth, hour: h, minute: mi });
+                }}
               />
             </label>
-            <label>
-              {f.lunarMonth}
-              <select value={lunar.month} onChange={(e) => setLunar({ ...lunar, month: Number(e.target.value) })}>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {f.lunarDay}
-              <select value={lunar.day} onChange={(e) => setLunar({ ...lunar, day: Number(e.target.value) })}>
-                {Array.from({ length: 30 }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
-            </label>
             <label className="inline">
-              <input type="checkbox" checked={lunar.leap} onChange={(e) => setLunar({ ...lunar, leap: e.target.checked })} /> {f.leapMonth}
+              <input type="checkbox" checked={!birth.hourKnown} onChange={(e) => setBirth({ ...birth, hourKnown: !e.target.checked })} />{' '}
+              {m.birthInput.unknownTime}
             </label>
-          </div>
+          </>
         )}
-        <label>
-          {f.time}
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
-        </label>
         <label>
           {f.city}
           <select value={cityId} onChange={(e) => setCityId(e.target.value)}>
@@ -274,13 +285,14 @@ function PillarRow({
   pillars: BaziResult['pillars'];
   render: (p: Pillar) => React.ReactNode;
 }) {
+  const cell = (p: Pillar | null) => (p ? render(p) : '—');
   return (
     <tr>
       <th scope="row">{label}</th>
-      <td>{render(pillars.year)}</td>
-      <td>{render(pillars.month)}</td>
-      <td>{render(pillars.day)}</td>
-      <td>{render(pillars.hour)}</td>
+      <td>{cell(pillars.year)}</td>
+      <td>{cell(pillars.month)}</td>
+      <td>{cell(pillars.day)}</td>
+      <td>{cell(pillars.hour)}</td>
     </tr>
   );
 }

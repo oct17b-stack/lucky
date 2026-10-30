@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { LOCALES, getMessages } from '@lucky/content';
 import { THAI_BIRTH_DAYS, type ThaiBirthDayKey } from '@lucky/core';
+import Link from 'next/link';
 import { BirthDayCard } from '@/components/BirthDayCard';
+import { ShareButtons } from '@/components/ShareButtons';
+import { TaksaTable } from '@/components/TaksaTable';
 import { alternatesFor, resolveLocale } from '@/lib/site';
 
 type Props = { params: Promise<{ locale: string; day: string }> };
@@ -39,6 +42,13 @@ export default async function BirthDayPage({ params }: Props) {
     <article className="tool">
       <h1>{info.name[locale]}</h1>
       <BirthDayCard info={info} locale={locale} t={m.birthday} />
+      <ShareButtons t={m.share} text={info.name[locale]} />
+      <TaksaTable day={info.key} locale={locale} t={m.taksa} />
+      <p>
+        <Link className="button" href={`/${locale}/horoscope/${info.key}`}>
+          {m.nav2.horoscope}
+        </Link>
+      </p>
     </article>
   );
 }

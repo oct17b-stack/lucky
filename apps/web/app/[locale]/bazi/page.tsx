@@ -18,7 +18,7 @@ export default async function BaziPage({ params }: Props) {
     <article className="tool">
       <h1>{m.bazi.title}</h1>
       <p className="lead">{m.bazi.description}</p>
-      <BaziForm locale={locale} t={m.bazi} />
+      <BaziForm locale={locale} m={m} />
     </article>
   );
 }

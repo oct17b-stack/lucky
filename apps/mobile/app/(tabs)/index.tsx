@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ZODIAC_NAMES, dailyAlmanac, solarTermLabel, todayIn } from '@lucky/core';
+import { ZODIAC_NAMES, dailyAlmanac, dailyColors, formatThaiLunar, solarTermLabel, todayIn, weekdayOf } from '@lucky/core';
 import { format } from '@lucky/content';
 import { API_URL, deviceLocale, t } from '../../lib/i18n';
 
@@ -8,6 +8,7 @@ import { API_URL, deviceLocale, t } from '../../lib/i18n';
 export default function TodayScreen() {
   const today = todayIn('Asia/Bangkok');
   const a = dailyAlmanac(today.year, today.month, today.day);
+  const colors = dailyColors(weekdayOf(today.year, today.month, today.day));
   const c = t.calendar;
   const [server, setServer] = useState<string>('…');
 
@@ -25,6 +26,16 @@ export default function TodayScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>{t.dailyColor.title}</Text>
+      <View style={styles.colorGrid}>
+        {(['work', 'money', 'patron', 'avoid'] as const).map((p) => (
+          <View key={p} style={[styles.colorCell, p === 'avoid' && styles.avoid]}>
+            <View style={[styles.swatch, { backgroundColor: colors[p].color.hex }]} />
+            <Text style={styles.label}>{t.dailyColor.purposes[p]}</Text>
+            <Text style={styles.value}>{colors[p].color[deviceLocale]}</Text>
+          </View>
+        ))}
+      </View>
       <Text style={styles.title}>{c.todayTitle}</Text>
       <View style={[styles.card, { borderTopColor: a.weekday.color.hex }]}>
         <Text style={styles.date}>
@@ -33,6 +44,7 @@ export default function TodayScreen() {
         <Text style={styles.lunar}>
           {c.lunar} {lunar}
         </Text>
+        <Row label={t.thaiLunar.title} value={`${formatThaiLunar(a.thaiLunar)}${a.thaiLunar.holyDay ? ` · ${t.thaiLunar.holyDay}` : ''}`} />
         <Row label={c.buddhist} value={String(a.buddhistYear)} />
         <Row label={c.ganzhi} value={`${a.ganzhi.year} · ${a.ganzhi.month} · ${a.ganzhi.day}`} />
         <Row label={c.clash} value={format(c.clashFormat, { animal: ZODIAC_NAMES[deviceLocale][a.clashZodiacIndex]! })} />
@@ -71,4 +83,7 @@ const styles = StyleSheet.create({
   colorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },
   swatch: { width: 28, height: 28, borderRadius: 14 },
   footer: { color: '#6f625a', fontSize: 12, marginTop: 12 },
+  colorGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  colorCell: { width: '47%', borderWidth: 1, borderColor: '#e6dccf', borderRadius: 10, padding: 10, gap: 4 },
+  avoid: { borderStyle: 'dashed' },
 });

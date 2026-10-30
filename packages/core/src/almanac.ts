@@ -7,6 +7,7 @@ import { SOLAR_TERMS, solarTermUtc, type SolarTermName } from './astro.ts';
 import { computeBazi } from './bazi.ts';
 import { solarToLunar, formatLunarChinese, type LunarDate } from './lunar.ts';
 import { thaiBirthDay, toBuddhistYear, type ThaiBirthDayInfo } from './thai/birthday.ts';
+import { auspiciousDaysOf, thaiLunarDate, type AuspiciousDay, type ThaiLunarDate } from './thai/lunar.ts';
 import { timeZoneOffsetMinutes } from './time.ts';
 
 export type ZodiacLocale = 'th' | 'zh-hans' | 'zh-hant' | 'en';
@@ -67,6 +68,10 @@ export interface DailyAlmanac {
   /** 当日（按所在时区的日期）交节的节气 */
   solarTerm: { name: SolarTermName; utc: string } | null;
   weekday: ThaiBirthDayInfo;
+  /** 泰国阴历（ข้างขึ้น/ข้างแรม、วันพระ） */
+  thaiLunar: ThaiLunarDate;
+  /** วันธงชัย、วันอธิบดี、วันอุบาทว์、วันโลกาวินาศ */
+  auspicious: AuspiciousDay[];
 }
 
 function isValidDate(year: number, month: number, day: number): boolean {
@@ -76,7 +81,7 @@ function isValidDate(year: number, month: number, day: number): boolean {
 
 /** 生成某一天的万年历信息；timeZone 决定节气落在哪一天（默认曼谷） */
 export function dailyAlmanac(year: number, month: number, day: number, timeZone = 'Asia/Bangkok'): DailyAlmanac {
-  if (!isValidDate(year, month, day) || year < 1901 || year > 2099) throw new RangeError('日期无效或超出 1901–2099 年');
+  if (!isValidDate(year, month, day) || year < 1902 || year > 2098) throw new RangeError('日期无效或超出 1902–2098 年');
 
   const chart = computeBazi({
     birth: { year, month, day, hour: 12, minute: 0 },
@@ -107,6 +112,8 @@ export function dailyAlmanac(year: number, month: number, day: number, timeZone 
     clashZodiacIndex: mod(dayBranch + 6, 12),
     solarTerm,
     weekday: thaiBirthDay({ year, month, day, hour: 12, minute: 0 }, { dayStartsAtSunrise: false }),
+    thaiLunar: thaiLunarDate(year, month, day),
+    auspicious: auspiciousDaysOf(year, month, day),
   };
 }
 

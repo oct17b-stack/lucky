@@ -31,3 +31,16 @@ test('浏览器语言协商', () => {
 test('插值', () => {
   assert.equal(format('起运：{years} 岁 {months} 个月', { years: 3, months: 4 }), '起运：3 岁 4 个月');
 });
+
+test('เซียมซี 28 签、塔罗 22 张，四语齐全', async () => {
+  const { SIAMSI, TAROT_MAJOR } = await import('../src/index.ts');
+  assert.equal(SIAMSI.length, 28);
+  assert.deepEqual(SIAMSI.map((s) => s.n), Array.from({ length: 28 }, (_, i) => i + 1));
+  assert.equal(TAROT_MAJOR.length, 22);
+  for (const locale of LOCALES) {
+    for (const s of SIAMSI) assert.ok(s.text[locale].length > 5, `签 ${s.n} ${locale}`);
+    for (const c of TAROT_MAJOR) {
+      assert.ok(c.name[locale] && c.upright[locale] && c.reversed[locale], `塔罗 ${c.n} ${locale}`);
+    }
+  }
+});

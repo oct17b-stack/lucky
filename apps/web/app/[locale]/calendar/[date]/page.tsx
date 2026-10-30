@@ -42,7 +42,7 @@ export default async function CalendarDayPage({ params }: Props) {
       <h1>
         {m.calendar.title} · {date}
       </h1>
-      <AlmanacView a={almanac} locale={locale} t={m.calendar} />
+      <AlmanacView a={almanac} locale={locale} t={m.calendar} tl={m.thaiLunar} />
     </article>
   );
 }

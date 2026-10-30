@@ -44,3 +44,17 @@ test('总分恒为 8，结论一定包含日主、强弱、喜用、主导十神
     }
   }
 });
+
+test('不知道出生时间时总分为 6（三干 2 + 三支 4，月支加倍）', () => {
+  const r = interpretBazi(
+    computeBazi({
+      birth: { year: 1985, month: 6, day: 8, hour: 0, minute: 0 },
+      timeZone: 'Asia/Bangkok',
+      longitude: 100.5,
+      gender: 'female',
+      hourKnown: false,
+    }),
+  );
+  const total = Object.values(r.elementScores).reduce((a, b) => a + b, 0);
+  assert.ok(Math.abs(total - 6) < 0.05, `总分 ${total}`);
+});

@@ -100,3 +100,30 @@ test('输入校验', () => {
     }),
   );
 });
+
+test('不知道出生时间：只排三柱，五行计六个字', () => {
+  const r = computeBazi({
+    birth: { year: 2000, month: 1, day: 1, hour: 0, minute: 0 },
+    timeZone: 'Asia/Shanghai',
+    longitude: 116.4,
+    gender: 'male',
+    hourKnown: false,
+  });
+  assert.equal(r.pillars.hour, null);
+  assert.deepEqual([r.pillars.year.name, r.pillars.month.name, r.pillars.day.name], ['己卯', '丙子', '戊午']);
+  assert.equal(Object.values(r.elementCount).reduce((a, b) => a + b, 0), 6);
+  assert.equal(r.meta.hourKnown, false);
+  assert.deepEqual(r.meta.uncertain, []);
+});
+
+test('不知道出生时间且当天立春：标出年柱和月柱不确定', () => {
+  const r = computeBazi({
+    birth: { year: 2024, month: 2, day: 4, hour: 0, minute: 0 },
+    timeZone: 'Asia/Shanghai',
+    longitude: 120,
+    gender: 'female',
+    hourKnown: false,
+    options: { trueSolarTime: false },
+  });
+  assert.deepEqual(r.meta.uncertain, ['year', 'month']);
+});

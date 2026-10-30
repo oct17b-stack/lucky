@@ -24,7 +24,7 @@ export default async function TodayPage({ params }: Props) {
     <article className="tool">
       <h1>{m.calendar.todayTitle}</h1>
       <p className="lead">{m.calendar.description}</p>
-      <AlmanacView a={a} locale={locale} t={m.calendar} />
+      <AlmanacView a={a} locale={locale} t={m.calendar} tl={m.thaiLunar} />
     </article>
   );
 }
