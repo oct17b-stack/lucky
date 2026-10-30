@@ -65,3 +65,28 @@ test('上升点：春分日当地恒星时 0 时（赤道），上升点约为�
   const asc = tropicalAscendant(t, 0, 0);
   assert.ok(Math.abs(asc - 90) < 2, `上升点 ${asc}`);
 });
+
+/**
+ * 泰国网站公布的ราศี日期区间（KTC、Wongnai、Thairath 一致）：
+ * เมษ 13/4、พฤษภ 15/5、เมถุน 15/6、กรกฎ 15/7、สิงห์ 16/8、กันย์ 17/9、ตุลย์ 17/10、
+ * พิจิก 16/11、ธนู 16/12、มังกร 15/1、กุมภ์ 13/2、มีน 15/3。
+ * 这些是简化的固定日期；按 Lahiri 实际计算，太阳入宫时刻每年浮动，
+ * 且不知道出生时间时按正午判断，所以“正午已入宫的第一天”落在公布日期的 −1 到 +2 天之间。
+ * （参照：泰国官方公布的 2567 年 มหาสงกรานต์ 为 4 月 13 日晚间，与 Lahiri 计算相差约 20 分钟。）
+ */
+test('泰式星座与公布的日期区间一致（交界 −1 到 +2 天），2000–2030 年', () => {
+  const starts: [number, number, number][] = [
+    [4, 13, 0], [5, 15, 1], [6, 15, 2], [7, 15, 3], [8, 16, 4], [9, 17, 5],
+    [10, 17, 6], [11, 16, 7], [12, 16, 8], [1, 15, 9], [2, 13, 10], [3, 15, 11],
+  ];
+  for (let year = 2000; year <= 2030; year += 5) {
+    for (const [month, day, sign] of starts) {
+      const at = (d: number) =>
+        thaiZodiac({ birth: { year, month, day: d, hour: 12, minute: 0 }, timeZone: 'Asia/Bangkok', latitude: 13.75, longitude: 100.5, hourKnown: false }).sunSign;
+      assert.equal(at(day + 2), sign, `${year}-${month}-${day + 2} 应已进入`);
+      assert.equal(at(day - 2), (sign + 11) % 12, `${year}-${month}-${day - 2} 应未进入`);
+      // 区间中段（起始日 +10 天）一定在该星座
+      assert.equal(at(Math.min(day + 10, 28)), sign, `${year}-${month} 中段`);
+    }
+  }
+});
