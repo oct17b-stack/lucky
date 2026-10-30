@@ -72,7 +72,7 @@ done
 
 # 测试账号（内网版）：注册后带 cookie 能拿到会话
 check "登录页显示测试账号表单" 200 "$BASE/th/login"
-contains "测试账号表单" "บัญชีทดสอบ"
+contains "测试账号表单" "form test-login"
 JAR=$(mktemp)
 code=$(curl -s -o /tmp/smoke-body -w "%{http_code}" -c "$JAR" -X POST "$BASE/api/auth/sign-up/email" \
   -H "Content-Type: application/json" -H "Origin: $BASE" \
@@ -109,6 +109,6 @@ code=$(curl -s -o /tmp/smoke-body -w "%{http_code}" -X POST "$BASE/api/auth/sign
   -d '{"name":"CI2","email":"ci2@example.com","password":"ci-password-123"}')
 if [ "$code" != "200" ]; then echo "通过  正式版拒绝测试账号注册（$code）"; else echo "失败  正式版居然允许测试账号注册"; fail=1; fi
 check "正式版登录页" 200 "$BASE/th/login"
-if grep -q "บัญชีทดสอบ" /tmp/smoke-body; then echo "失败  正式版登录页出现测试账号表单"; fail=1; else echo "通过  正式版登录页没有测试账号表单"; fi
+if grep -q "form test-login" /tmp/smoke-body; then echo "失败  正式版登录页出现测试账号表单"; fail=1; else echo "通过  正式版登录页没有测试账号表单"; fi
 
 exit $fail
